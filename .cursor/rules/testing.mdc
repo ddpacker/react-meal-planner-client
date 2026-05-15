@@ -1,0 +1,139 @@
+---
+description: Vitest + React Testing Library conventions, MSW for API mocking, and React Query test setup. Active when editing __tests__/.
+globs: src/__tests__/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+## Testing stack
+
+- **Vitest** — test runner (configured in `vite.config.ts`).
+- **React Testing Library** — component and hook testing.
+- **MSW (Mock Service Worker)** — API mocking; never make real network calls in tests.
+- **@testing-library/user-event** — simulate user interactions.
+
+## Test structure
+
+```
+src/
+  __tests__/
+    hooks/          # Custom hook tests
+    components/     # Component integration tests
+    pages/          # Page-level integration tests
+    lib/            # API function and utility tests
+  __mocks__/
+    handlers.ts     # MSW request handlers
+    server.ts       # MSW node server setup
+```
+
+One test file per hook or component. Filename mirrors the source file: `useRecipes.test.ts`, `RecipeCard.test.tsx`.
+
+## React Query wrapper
+
+Wrap components under test in a fresh `QueryClientProvider`, a `MemoryRouter`, and a test-controlled `AuthProvider`. Use a factory to avoid shared cache state between tests.
+
+`renderWithProviders` accepts an `authState` option so tests can declare whether they are rendering as an authenticated or unauthenticated user without relying on the `/users/me` MSW handler resolving first.
+
+```tsx
+// src/__tests__/utils.tsx
+import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+}
+
+type RenderOptions = {
+  authState?: { isAuthenticated: boolean; isLoading?: boolean };
+  initialEntries?: string[];
+};
+
+export function renderWithProviders(
+  ui: React.ReactElement,
+  { authState = { isAuthenticated: true, isLoading: false }, initialEntries }: RenderOptions = {},
+) {
+  const queryClient = createTestQueryClient();
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>
+      <QueryClientProvider client={queryClient}>
+        <AuthContext.Provider value={{ ...authState, isLoading: authState.isLoading ?? false }}>
+          {ui}
+        </AuthContext.Provider>
+      </QueryClientProvider>
+    </MemoryRouter>
+  );
+}
+```
+
+Always use `renderWithProviders` — not bare `render` — for any component that uses hooks or routing. Default `authState` is authenticated so most tests need no extra configuration; pass `{ isAuthenticated: false }` to test unauthenticated behaviour and `{ isLoading: true }` to test the loading/spinner state.
+
+## MSW setup
+
+Define handlers that mirror the backend API contract.
+
+```ts
+// src/__mocks__/handlers.ts
+import { http, HttpResponse } from 'msw';
+
+export const handlers = [
+  http.get('/api/recipes', () =>
+    HttpResponse.json([{ id: 1, title: 'Chicken Taco', servings: 4 }])
+  ),
+  http.delete('/api/recipes/:id', () => new HttpResponse(null, { status: 204 })),
+];
+```
+
+```ts
+// src/__mocks__/server.ts
+import { setupServer } from 'msw/node';
+import { handlers } from './handlers';
+
+export const server = setupServer(...handlers);
+```
+
+```ts
+// vitest.setup.ts
+import { server } from './__mocks__/server';
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+```
+
+Override handlers per-test using `server.use(...)` for error or edge-case scenarios.
+
+## Assertions
+
+- Assert what the user sees — rendered text, presence of elements, ARIA roles.
+- Use `screen.getByRole`, `screen.getByText`, `screen.getByLabelText` — not `getByTestId` unless no accessible alternative exists.
+- Assert HTTP status effects: after a successful delete, assert the item is gone from the list.
+- For mutations, wait for async side effects with `waitFor` or `findBy*` queries.
+
+```tsx
+it('removes a recipe after deletion', async () => {
+  renderWithProviders(<RecipesPage />);
+  const deleteButton = await screen.findByRole('button', { name: /delete chicken taco/i });
+  await userEvent.click(deleteButton);
+  await waitFor(() =>
+    expect(screen.queryByText('Chicken Taco')).not.toBeInTheDocument()
+  );
+});
+```
+
+## Running tests
+
+```bash
+npm run test               # watch mode
+npm run test -- --run      # CI / single pass
+npm run test -- --coverage # with coverage report
+```
+
+## Do not
+
+- Do not make real HTTP requests in tests — always use MSW.
+- Do not assert on internal state, hook internals, or implementation details.
+- Do not use `act()` directly — prefer `waitFor` or `findBy*` which handle async automatically.
+- Do not use `getByTestId` when an accessible query (`getByRole`, `getByLabelText`) works.
+- Do not share a `QueryClient` instance between tests — create a fresh one per test.

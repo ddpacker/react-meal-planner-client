@@ -1,0 +1,65 @@
+---
+description: Frontend security rules — token storage, XSS prevention, input handling, and API credential hygiene. Always active.
+globs:
+alwaysApply: true
+---
+
+## Auth tokens
+
+The app is deployed behind Azure Front Door, which terminates TLS and forwards requests to the FastAPI backend under the same origin as the frontend. This topology makes `SameSite=Strict` safe and eliminates the need for `withCredentials` on cross-origin requests.
+
+The JWT is issued by the backend and delivered as a cookie with the following attributes — all three are required:
+
+- **`HttpOnly`** — the cookie is inaccessible to JavaScript. XSS cannot steal the token.
+- **`Secure`** — the cookie is only transmitted over HTTPS. Azure Front Door enforces this.
+- **`SameSite=Strict`** — the cookie is never sent on cross-site requests, providing CSRF protection without a separate token.
+
+`localStorage` is explicitly prohibited for token storage. Storing JWTs in `localStorage` exposes them to any XSS payload on the page with no recovery path. The `HttpOnly` cookie approach is not a preference — it is the only acceptable mechanism.
+
+The frontend has no visibility into the cookie value and requires none. The browser attaches it automatically to every same-origin request.
+
+## API requests
+
+- All requests go through the single Axios instance in `src/lib/api/client.ts` — never use `fetch` or a separate Axios instance.
+- Because Azure Front Door proxies the API under the same origin as the client, `withCredentials: true` is not required and must not be set — it has no effect for same-origin requests and would cause preflight failures if the origin ever differs.
+- Never pass the token as a query parameter or in the URL.
+- On a 401 response (token expired or revoked), the response interceptor redirects to `/login`; individual hooks do not need to handle this case.
+
+## Environment variables
+
+- `VITE_API_BASE_URL` is a public build-time variable — do not put API keys or secrets in `.env` files prefixed with `VITE_`.
+- Never commit `.env.local` or any file containing real credentials.
+
+## XSS prevention
+
+- React's JSX escapes string interpolation by default — never use `dangerouslySetInnerHTML` unless rendering sanitised, trusted content.
+- If rich text must be rendered, sanitise it with `DOMPurify` before passing to `dangerouslySetInnerHTML`.
+- Do not construct HTML strings from user input.
+
+```tsx
+// Wrong — do not do this
+<div dangerouslySetInnerHTML={{ __html: recipe.instructions }} />
+
+// Correct — render as plain text; use a whitelist-sanitiser if HTML is unavoidable
+<p>{recipe.instructions}</p>
+```
+
+## Input validation
+
+- Validate all form input client-side with Zod schemas (see `components.mdc`) before submission.
+- Client-side validation is a UX aid only — the backend is the authoritative validator. Do not skip or weaken server-side checks based on frontend validation passing.
+- Never trust data received from the API without typing it — all responses must pass through typed API functions in `src/lib/api/`.
+
+## Route protection
+
+- Every authenticated route is wrapped in `<RequireAuth>` (see `state.mdc`).
+- `<RequireAuth>` checks the authenticated state from `AuthContext` synchronously on render and redirects before any data fetching begins.
+- Do not rely on React Query errors to guard protected routes — guard them in the router.
+
+## Do not
+
+- Do not put API keys, secrets, or passwords anywhere in the frontend source.
+- Do not attempt to read, store, or log the JWT — it lives only in the `HttpOnly` cookie.
+- Do not disable or bypass CORS — configure it correctly on the backend.
+- Do not use `eval()` or `new Function()`.
+- Do not use `dangerouslySetInnerHTML` without `DOMPurify` sanitisation.

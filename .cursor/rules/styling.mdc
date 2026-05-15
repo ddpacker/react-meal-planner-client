@@ -1,0 +1,82 @@
+---
+description: Tailwind CSS v4 + MUI v9 styling conventions — when to use each, layout rules, and overrides. Active when editing components/ or pages/.
+globs: src/components/**/*.tsx,src/pages/**/*.tsx
+alwaysApply: false
+---
+
+## Two-layer system
+
+This project uses Tailwind CSS v4 and MUI v9 together:
+
+- **Tailwind** — layout, spacing, typography, colour, responsive breakpoints.
+- **MUI** — interactive components with built-in accessibility: `Button`, `TextField`, `Select`, `Dialog`, `Snackbar`, `CircularProgress`, etc.
+
+Use the right tool for the job. Do not rebuild MUI primitives from scratch with Tailwind, and do not fight MUI's structure with deep Tailwind overrides.
+
+## Tailwind
+
+- Apply Tailwind classes directly on JSX elements for layout and spacing.
+- Use Tailwind for `flex`, `grid`, `gap`, `p-*`, `m-*`, `text-*`, `font-*`, `rounded-*`, `border`, `shadow`.
+- Use responsive prefixes (`sm:`, `md:`, `lg:`) for breakpoints — do not write media queries manually.
+- Use Tailwind's `dark:` variant for dark mode where applicable.
+- Do not use arbitrary values (`w-[347px]`) unless a design token genuinely doesn't exist.
+
+```tsx
+// Correct — Tailwind for layout
+<div className="flex flex-col gap-4 p-6 max-w-2xl mx-auto">
+  <RecipeCard recipe={recipe} />
+</div>
+
+// Wrong — inline styles for layout
+<div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+```
+
+## MUI components
+
+- Import MUI components from `@mui/material`.
+- Use the `size` and `variant` props instead of overriding dimensions manually.
+- For minor visual tweaks on MUI components, prefer the `sx` prop over adding a Tailwind class on the MUI component root.
+- Do not wrap a MUI `Button` in a `<div>` just to add spacing — use Tailwind on the surrounding container.
+
+```tsx
+// Correct
+<Button variant="contained" size="small" onClick={onSave}>
+  Save recipe
+</Button>
+
+// Wrong — reimplementing what MUI already provides
+<button className="bg-blue-600 text-white px-4 py-2 rounded">Save recipe</button>
+```
+
+## MUI + Tailwind conflict avoidance
+
+- MUI renders with Emotion; Tailwind injects via the Vite plugin. Specificity conflicts are rare but can occur.
+- If a Tailwind class on a MUI component root has no effect, use `sx` instead.
+- Do not apply MUI `sx` for layout concerns that Tailwind handles — keep concerns separated.
+
+```tsx
+// Correct — Tailwind on the wrapper, sx for MUI-specific tweak
+<div className="mt-4">
+  <TextField
+    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+    label="Recipe title"
+    {...register('title')}
+  />
+</div>
+
+// Wrong — fighting two systems in one place
+<TextField className="mt-4 w-full" sx={{ marginTop: '16px' }} />
+```
+
+## Colour and typography
+
+- Use Tailwind colour utilities (`text-slate-700`, `bg-amber-50`, etc.) on non-MUI elements.
+- For MUI components, use the MUI theme or `sx` with theme tokens (`color: 'text.secondary'`).
+- Do not hardcode hex values — use Tailwind's palette or MUI's theme.
+
+## Do not
+
+- Do not use the `style` prop for anything Tailwind or MUI can handle.
+- Do not import `@emotion/react` or `@emotion/styled` directly — MUI manages Emotion internally.
+- Do not create custom CSS files for component-level styles; use Tailwind utilities instead.
+- Do not use `!important` overrides.

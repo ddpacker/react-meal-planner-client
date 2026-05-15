@@ -1,0 +1,102 @@
+---
+description: React component conventions — file structure, naming, props, forms, and composition rules. Always active.
+globs:
+alwaysApply: true
+---
+
+## Directory layout (do not deviate)
+
+```
+src/
+  components/        # Shared, reusable UI components
+  pages/             # Route-level components (one per route)
+  hooks/             # Custom hooks (useXxx.ts)
+  lib/
+    api/             # Axios client + per-resource API functions
+    queryKeys.ts     # All React Query key factories
+  types/             # Shared TypeScript types mirroring API schemas
+  router.tsx         # React Router route definitions
+```
+
+## Component conventions
+
+- One component per file. Filename matches the exported component (PascalCase).
+- Use named exports — not default exports — for all components except route-level pages.
+- Define props with a TypeScript `type` alias immediately above the component.
+- Keep components small. If a component exceeds ~100 lines, split it.
+
+```tsx
+// Correct
+type RecipeCardProps = {
+  recipe: Recipe;
+  onDelete?: (id: number) => void;
+};
+
+export function RecipeCard({ recipe, onDelete }: RecipeCardProps) { ... }
+
+// Wrong — avoid
+export default function RecipeCard(props: any) { ... }
+```
+
+## Forms
+
+- Use React Hook Form + Zod for all forms. Zod schema is the source of truth for validation.
+- Infer the form type from the Zod schema via `z.infer<typeof schema>`.
+- Use `@hookform/resolvers/zod` to wire the resolver.
+- Never manage form field state with `useState`.
+
+```tsx
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  servings: z.number().min(1),
+});
+
+type FormValues = z.infer<typeof schema>;
+
+export function RecipeForm({ onSubmit }: { onSubmit: (values: FormValues) => void }) {
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+  });
+  ...
+}
+```
+
+## Type conventions
+
+Mirror the backend schema naming in `src/types/`:
+
+- `*Base` — shared fields (rarely needed on the frontend).
+- `*Create` — POST request body shapes.
+- `*Update` — PATCH/PUT request body shapes (partial fields).
+- `*Read` — API response shapes (includes `id`, timestamps, nested reads).
+
+```ts
+// src/types/recipe.ts
+export type RecipeRead = {
+  id: number;
+  title: string;
+  servings: number;
+  instructions: string;
+  ingredients: RecipeIngredientRead[];
+  created_at: string;
+};
+
+export type RecipeCreate = {
+  title: string;
+  servings: number;
+  instructions: string;
+  ingredients: RecipeIngredientCreate[];
+};
+```
+
+## Do not
+
+- Do not use `any` — use `unknown` and narrow, or define a proper type.
+- Do not pass server data down as props across multiple levels — read from query hooks directly.
+- Do not put API calls or React Query calls inside components — extract to `src/hooks/`.
+- Do not use class components.
+- Do not co-locate test files with source; put them under `src/__tests__/`.
