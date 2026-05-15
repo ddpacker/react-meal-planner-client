@@ -29,13 +29,16 @@ One test file per hook or component. Filename mirrors the source file: `useRecip
 
 ## React Query wrapper
 
-Wrap components under test in a fresh `QueryClientProvider`. Use a factory to avoid shared cache state between tests.
+Wrap components under test in a fresh `QueryClientProvider`, a `MemoryRouter`, and a test-controlled `AuthProvider`. Use a factory to avoid shared cache state between tests.
+
+`renderWithProviders` accepts an `authState` option so tests can declare whether they are rendering as an authenticated or unauthenticated user without relying on the `/users/me` MSW handler resolving first.
 
 ```tsx
 // src/__tests__/utils.tsx
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 function createTestQueryClient() {
   return new QueryClient({
@@ -43,17 +46,29 @@ function createTestQueryClient() {
   });
 }
 
-export function renderWithProviders(ui: React.ReactElement) {
+type RenderOptions = {
+  authState?: { isAuthenticated: boolean; isLoading?: boolean };
+  initialEntries?: string[];
+};
+
+export function renderWithProviders(
+  ui: React.ReactElement,
+  { authState = { isAuthenticated: true, isLoading: false }, initialEntries }: RenderOptions = {},
+) {
   const queryClient = createTestQueryClient();
   return render(
-    <MemoryRouter>
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    <MemoryRouter initialEntries={initialEntries}>
+      <QueryClientProvider client={queryClient}>
+        <AuthContext.Provider value={{ ...authState, isLoading: authState.isLoading ?? false }}>
+          {ui}
+        </AuthContext.Provider>
+      </QueryClientProvider>
     </MemoryRouter>
   );
 }
 ```
 
-Always use `renderWithProviders` — not bare `render` — for any component that uses hooks or routing.
+Always use `renderWithProviders` — not bare `render` — for any component that uses hooks or routing. Default `authState` is authenticated so most tests need no extra configuration; pass `{ isAuthenticated: false }` to test unauthenticated behaviour and `{ isLoading: true }` to test the loading/spinner state.
 
 ## MSW setup
 

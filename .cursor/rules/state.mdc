@@ -10,6 +10,13 @@ alwaysApply: false
 - Encapsulate every `useQuery` / `useMutation` call inside a custom hook in `src/hooks/`.
 - Query key factories live in `src/lib/queryKeys.ts` — never inline string arrays.
 
+- Group API functions by resource, mirroring the backend router structure:
+  - `src/lib/api/auth.ts` — login, register, logout
+  - `src/lib/api/mealPlans.ts` — CRUD + generate-recipes
+  - `src/lib/api/recipes.ts` — CRUD + nutrition
+  - `src/lib/api/chat.ts` — sessions + messages
+  - `src/lib/api/grocery.ts` — list + items + export
+
 ```ts
 // src/lib/queryKeys.ts
 export const recipeKeys = {
@@ -48,38 +55,21 @@ export function useDeleteRecipe() {
 
 - One Axios instance in `src/lib/api/client.ts` — never import Axios directly in components or hooks.
 - Base URL from `import.meta.env.VITE_API_BASE_URL`.
-- Set `withCredentials: true` so the browser sends the `HttpOnly` JWT cookie on every request automatically — no manual token attachment needed.
-- On 401 response, redirect to `/login` via a response interceptor.
+- The browser attaches the `HttpOnly` access token cookie automatically on every request — no manual attachment needed (see `security.mdc`).
+- The response interceptor handles silent token refresh before ever redirecting the user to `/login`.
 
-```ts
-// src/lib/api/client.ts
-import axios from 'axios';
+## Token refresh
 
-export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true,
-});
+The backend issues two cookies on login: a short-lived **access token** and a longer-lived **refresh token** (both `HttpOnly; Secure; SameSite=Strict`). When the access token expires, the interceptor silently exchanges the refresh token for a new one via `POST /auth/refresh`, then retries the original request — the user never sees the expiry.
 
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) window.location.href = '/login';
-    return Promise.reject(error);
-  },
-);
-```
+The interceptor must serialise concurrent 401s: if multiple requests fail at the same time (e.g. a page that fires several queries on mount), only one refresh call is made. The other requests are queued and replayed once the refresh completes. If the refresh itself fails (refresh token expired or revoked), the queue is flushed with errors and the user is sent to `/login`.
 
-- Group API functions by resource, mirroring the backend router structure:
-  - `src/lib/api/auth.ts` — login, register, logout
-  - `src/lib/api/mealPlans.ts` — CRUD + generate-recipes
-  - `src/lib/api/recipes.ts` — CRUD + nutrition
-  - `src/lib/api/chat.ts` — sessions + messages
-  - `src/lib/api/grocery.ts` — list + items + export
 
 ## Auth state
 
 - Expose auth state (current user, login, logout) via a dedicated `useAuth` hook backed by a React context (`src/context/AuthContext.tsx`).
 - Track whether the user is authenticated via a boolean in `AuthContext` derived from a `/users/me` query succeeding — the frontend has no other signal.
+- `AuthContext` must also expose an `isLoading` boolean that is `true` while the `/users/me` query is in flight. `<RequireAuth>` must render a full-page spinner (or skeleton) while `isLoading` is `true` and must not make a redirect decision until it resolves. Without this, a hard refresh will either briefly flash protected content or incorrectly send an authenticated user to `/login`.
 - On logout, call `POST /auth/logout`, then redirect to `/login`.
 
 ## Routing — React Router v7
