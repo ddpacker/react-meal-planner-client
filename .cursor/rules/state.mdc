@@ -1,0 +1,121 @@
+---
+description: Server state with React Query v5, client routing with React Router v7, and local state rules. Active when editing hooks/, lib/api/, or router.tsx.
+globs: src/hooks/**/*.ts,src/lib/**/*.ts,src/router.tsx
+alwaysApply: false
+---
+
+## Server state — React Query v5
+
+- React Query owns all server state. Do not mirror API data into `useState`.
+- Encapsulate every `useQuery` / `useMutation` call inside a custom hook in `src/hooks/`.
+- Query key factories live in `src/lib/queryKeys.ts` — never inline string arrays.
+
+```ts
+// src/lib/queryKeys.ts
+export const recipeKeys = {
+  all: ['recipes'] as const,
+  lists: () => [...recipeKeys.all, 'list'] as const,
+  detail: (id: number) => [...recipeKeys.all, 'detail', id] as const,
+};
+
+export const mealPlanKeys = {
+  all: ['mealPlans'] as const,
+  lists: () => [...mealPlanKeys.all, 'list'] as const,
+  detail: (id: number) => [...mealPlanKeys.all, 'detail', id] as const,
+};
+```
+
+```ts
+// src/hooks/useRecipes.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { recipeKeys } from '../lib/queryKeys';
+import { fetchRecipes, deleteRecipe } from '../lib/api/recipes';
+
+export function useRecipes() {
+  return useQuery({ queryKey: recipeKeys.lists(), queryFn: fetchRecipes });
+}
+
+export function useDeleteRecipe() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteRecipe,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: recipeKeys.lists() }),
+  });
+}
+```
+
+## API client (`src/lib/api/`)
+
+- One Axios instance in `src/lib/api/client.ts` — never import Axios directly in components or hooks.
+- Base URL from `import.meta.env.VITE_API_BASE_URL`.
+- Set `withCredentials: true` so the browser sends the `HttpOnly` JWT cookie on every request automatically — no manual token attachment needed.
+- On 401 response, redirect to `/login` via a response interceptor.
+
+```ts
+// src/lib/api/client.ts
+import axios from 'axios';
+
+export const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) window.location.href = '/login';
+    return Promise.reject(error);
+  },
+);
+```
+
+- Group API functions by resource, mirroring the backend router structure:
+  - `src/lib/api/auth.ts` — login, register, logout
+  - `src/lib/api/mealPlans.ts` — CRUD + generate-recipes
+  - `src/lib/api/recipes.ts` — CRUD + nutrition
+  - `src/lib/api/chat.ts` — sessions + messages
+  - `src/lib/api/grocery.ts` — list + items + export
+
+## Auth state
+
+- Expose auth state (current user, login, logout) via a dedicated `useAuth` hook backed by a React context (`src/context/AuthContext.tsx`).
+- Track whether the user is authenticated via a boolean in `AuthContext` derived from a `/users/me` query succeeding — the frontend has no other signal.
+- On logout, call `POST /auth/logout`, then redirect to `/login`.
+
+## Routing — React Router v7
+
+- Route definitions live only in `src/router.tsx`.
+- Protect authenticated routes with a `<RequireAuth>` wrapper component that redirects to `/login` if the user is not authenticated.
+- Use `useNavigate` for programmatic navigation — not `window.location`.
+
+```tsx
+// src/router.tsx
+import { createBrowserRouter } from 'react-router-dom';
+
+export const router = createBrowserRouter([
+  { path: '/login', element: <LoginPage /> },
+  {
+    element: <RequireAuth />,
+    children: [
+      { path: '/', element: <MealPlansPage /> },
+      { path: '/recipes', element: <RecipesPage /> },
+      { path: '/recipes/:id', element: <RecipeDetailPage /> },
+      { path: '/meal-plans/:id', element: <MealPlanDetailPage /> },
+      { path: '/grocery/:listId', element: <GroceryListPage /> },
+    ],
+  },
+]);
+```
+
+## Local state
+
+- `useState` for UI-only state: open/closed dialogs, selected tab, controlled input that hasn't been submitted yet.
+- `useReducer` when local state transitions are complex (multiple dependent fields).
+- Never lift server state into local state — read directly from query hooks.
+
+## Do not
+
+- Do not call `useQuery` or `useMutation` directly in page or component files — use custom hooks.
+- Do not store API response data in a global store (Redux, Zustand, etc.) — React Query is the cache.
+- Do not use React Router `loader` functions for data fetching — use React Query hooks.
+- Do not hardcode the API base URL — always read from `import.meta.env.VITE_API_BASE_URL`.
