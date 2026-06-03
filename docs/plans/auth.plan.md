@@ -24,7 +24,7 @@ todos:
         refreshToken() -> void (used internally by interceptor)
         getMe() -> UserRead
       All use the shared Axios instance from client.ts.
-    status: pending
+    status: completed
     dependencies:
       - axios-client
 
@@ -110,7 +110,7 @@ todos:
 | Status | Task |
 |--------|------|
 | ✅ Done | Axios client + 401 refresh interceptor |
-| ⏳ Pending | Auth API functions (login, register, logout, getMe) |
+| ✅ Done | Auth API functions (login, register, logout, getMe) |
 | ⏳ Pending | AuthContext + useAuth hook |
 | ⏳ Pending | RequireAuth route guard |
 | ⏳ Pending | Router (public + authenticated routes) |

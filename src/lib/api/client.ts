@@ -1,4 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { refreshToken } from './auth';
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -29,10 +30,6 @@ function redirectToLogin(): void {
   const { pathname } = window.location;
   if (pathname === '/login' || pathname === '/register') return;
   window.location.assign('/login');
-}
-
-async function refreshAccessToken(): Promise<void> {
-  await apiClient.post('/auth/refresh');
 }
 
 function flushQueue(error: unknown | null): void {
@@ -78,7 +75,7 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      await refreshAccessToken();
+      await refreshToken();
       flushQueue(null);
       return apiClient(originalRequest);
     } catch (refreshError) {
