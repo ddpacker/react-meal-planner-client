@@ -10,8 +10,19 @@ type QueueEntry = {
 
 const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
+let _accessToken: string | null = null;
+export function setAccessToken(token: string): void { _accessToken = token; }
+export function clearAccessToken(): void { _accessToken = null; }
+
 export const apiClient = axios.create({
   baseURL,
+});
+
+apiClient.interceptors.request.use((config) => {
+  if (_accessToken) {
+    config.headers.Authorization = `Bearer ${_accessToken}`;
+  }
+  return config;
 });
 
 let isRefreshing = false;

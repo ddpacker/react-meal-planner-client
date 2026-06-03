@@ -31,7 +31,9 @@ export function applyAuthenticatedSessionHandlers(
 
 export function applyLoginSuccessHandlers(user: UserRead = mockUser): void {
   server.use(
-    http.post(`${API_BASE_URL}/auth/login`, () => new HttpResponse(null, { status: 204 })),
+    http.post(`${API_BASE_URL}/auth/login`, () =>
+      HttpResponse.json({ access_token: 'test-access-token', token_type: 'bearer' }),
+    ),
     http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(user)),
   );
 }
@@ -47,7 +49,9 @@ export function applyLoginFailureHandlers(): void {
 export function applyRegisterSuccessHandlers(user: UserRead): void {
   server.use(
     http.post(`${API_BASE_URL}/auth/register`, () => new HttpResponse(null, { status: 201 })),
-    http.post(`${API_BASE_URL}/auth/login`, () => new HttpResponse(null, { status: 204 })),
+    http.post(`${API_BASE_URL}/auth/login`, () =>
+      HttpResponse.json({ access_token: 'test-access-token', token_type: 'bearer' }),
+    ),
     http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(user)),
   );
 }
