@@ -95,8 +95,8 @@ export const server = setupServer(...handlers);
 ```
 
 ```ts
-// vitest.setup.ts
-import { server } from './__mocks__/server';
+// vitest.setup.ts  (project root)
+import { server } from './src/__mocks__/server';
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
@@ -125,9 +125,9 @@ it('removes a recipe after deletion', async () => {
 ## Running tests
 
 ```bash
-npm run test               # watch mode
-npm run test -- --run      # CI / single pass
-npm run test -- --coverage # with coverage report
+npm run test          # watch mode
+npm run test:run      # CI / single pass
+npm run test:coverage # with coverage report
 ```
 
 ## Do not
