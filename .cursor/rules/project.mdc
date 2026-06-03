@@ -1,0 +1,99 @@
+---
+description: Project-wide context for the React meal planner frontend. Always applied.
+alwaysApply: true
+---
+
+# Meal Planner Frontend
+
+React + TypeScript SPA. FastAPI backend at `VITE_API_BASE_URL` (default `http://localhost:8000`).
+
+**Stack:** Vite · Tailwind CSS v4 · MUI v9 · React Query v5 · React Router v7 · React Hook Form + Zod · Axios · Vitest + MSW
+
+## Directory structure
+
+```
+src/
+  components/        # Shared UI components (PascalCase, named exports)
+  pages/             # Route-level components (one per route, default export ok)
+  hooks/             # Custom hooks (useXxx.ts) — all useQuery/useMutation calls live here
+  context/
+    AuthContext.tsx  # Auth state + login/logout + unitSystem preference
+  lib/
+    api/
+      client.ts      # Single Axios instance — never import Axios elsewhere
+      auth.ts        # login, register, logout, refresh, getMe
+      mealPlans.ts   # CRUD + generate-recipes
+      recipes.ts     # CRUD + nutrition
+      chat.ts        # sessions + messages
+      grocery.ts     # list + items + export
+      user.ts        # me, preferences
+    queryKeys.ts     # All React Query key factories — never inline string arrays
+  types/             # TypeScript types mirroring backend Pydantic schemas
+  router.tsx         # Route definitions
+  main.tsx           # QueryClientProvider + RouterProvider
+```
+
+## Routing
+
+Public: `/login`, `/register`, `/auth/google/callback`
+Authenticated (wrapped in `<RequireAuth>`): `/`, `/meal-plans/:id`, `/recipes`, `/recipes/:id`, `/grocery/:listId`, `/profile`
+
+`<RequireAuth>` renders a full-page `CircularProgress` while `isLoading` is true — never redirect before the `/users/me` query resolves or authenticated users get sent to `/login` on hard refresh.
+
+## Non-negotiable conventions
+
+- **One Axios instance** — `src/lib/api/client.ts`. Never import Axios directly in any other file.
+- **Query keys** — all in `src/lib/queryKeys.ts`. Never inline `['recipes']` etc. in hooks or components.
+- **Hooks** — all `useQuery` / `useMutation` calls live in `src/hooks/`. Never call them directly in components or pages.
+- **Types** — `src/types/` mirrors backend Pydantic naming: `*Read` (responses), `*Create` (POST bodies), `*Update` (PATCH bodies). Infer TypeScript types from Zod schemas via `z.infer<>` — do not define them separately.
+- **Auth** — JWT is an `HttpOnly` cookie. The frontend never reads the token value. No `withCredentials` needed (same-origin via Azure Front Door).
+- **Units** — the API always returns metric. `UnitSystem` preference is display-only. Never submit imperial values to the API. Use `formatQuantity(value, unit, unitSystem)` for display conversion.
+- **Null macros** — display `null` nutrition fields as `—`, never `0`.
+- **Server state** — React Query owns all server state. Do not lift it into `useState` or a global store.
+
+## Auth context shape
+
+```ts
+// src/context/AuthContext.tsx
+isAuthenticated: boolean   // true when /users/me resolves
+isLoading: boolean         // true while /users/me is in flight
+user: UserRead | null
+unitSystem: UnitSystem     // fetched alongside /users/me, default 'metric'
+login(email, password): Promise<void>
+logout(): Promise<void>    // POST /auth/logout → clear cache → navigate /login
+```
+
+## Axios 401 interceptor (token refresh)
+
+Serialise concurrent 401s — only one `POST /auth/refresh` fires. Queue failed requests and replay after refresh. On refresh failure, flush the queue with errors and redirect to `/login`.
+
+```ts
+let isRefreshing = false;
+let pendingQueue: Array<(token: void) => void> = [];
+// on 401: if (!isRefreshing) kick off refresh, else push to queue
+```
+
+## Query key pattern
+
+```ts
+export const recipeKeys = {
+  all: ['recipes'] as const,
+  lists: () => [...recipeKeys.all, 'list'] as const,
+  list: (params: object) => [...recipeKeys.lists(), params] as const,
+  detail: (id: number) => [...recipeKeys.all, 'detail', id] as const,
+};
+```
+
+## Styling rules
+
+- **Tailwind v4** for layout, spacing, typography, colour, responsive breakpoints.
+- **MUI v9** for interactive components (`Button`, `TextField`, `Dialog`, `CircularProgress`, `Chip`, etc.).
+- Tailwind on wrappers/layout. MUI `sx` prop for component-level overrides only.
+- Never use the `style` prop or custom CSS files for component-level styles.
+
+## Testing rules
+
+- Tests live in `src/__tests__/`, mirroring the `src/` structure.
+- Always use `renderWithProviders` (wraps QueryClient + Router + AuthContext).
+- Mock the API layer with MSW — never mock React Query internals or Axios directly.
+- Run with `npm run test:run` (single-pass) or `npm run test` (watch).
