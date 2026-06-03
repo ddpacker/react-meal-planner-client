@@ -13,7 +13,7 @@ todos:
       replay queued requests. If the refresh call itself fails (refresh token expired or
       revoked), flush the queue with errors and redirect to /login. Do not set
       withCredentials — requests are same-origin.
-    status: pending
+    status: completed
 
   - id: auth-api
     content: >
@@ -109,7 +109,7 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | Axios client + 401 refresh interceptor |
+| ✅ Done | Axios client + 401 refresh interceptor |
 | ⏳ Pending | Auth API functions (login, register, logout, getMe) |
 | ⏳ Pending | AuthContext + useAuth hook |
 | ⏳ Pending | RequireAuth route guard |
