@@ -55,7 +55,7 @@ todos:
       <RequireAuth>. Public routes: /login, /register, /auth/google/callback.
       Authenticated routes: /, /meal-plans/:id, /recipes, /recipes/:id,
       /grocery/:listId, /profile. Wire into src/main.tsx via RouterProvider.
-    status: pending
+    status: completed
     dependencies:
       - require-auth
 
@@ -113,7 +113,7 @@ todos:
 | ✅ Done | Auth API functions (login, register, logout, getMe) |
 | ✅ Done | AuthContext + useAuth hook |
 | ✅ Done | RequireAuth route guard |
-| ⏳ Pending | Router (public + authenticated routes) |
+| ✅ Done | Router (public + authenticated routes) |
 | ⏳ Pending | LoginPage (email/password + Google button) |
 | ⏳ Pending | RegisterPage |
 | ⏳ Pending | GoogleCallbackPage (OIDC return handler) |
