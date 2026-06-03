@@ -84,7 +84,7 @@ todos:
       and sets the JWT cookie before redirecting to this page. On mount, call GET /users/me
       to confirm the session is live, then navigate to /. Show an error state if /users/me
       fails (the Google flow failed server-side).
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -116,7 +116,7 @@ todos:
 | ✅ Done | Router (public + authenticated routes) |
 | ✅ Done | LoginPage (email/password + Google button) |
 | ✅ Done | RegisterPage |
-| ⏳ Pending | GoogleCallbackPage (OIDC return handler) |
+| ✅ Done | GoogleCallbackPage (OIDC return handler) |
 | ⏳ Pending | Auth tests |
 
 ---
