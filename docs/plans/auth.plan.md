@@ -65,7 +65,7 @@ todos:
       On success, navigate to /. Show inline error for invalid credentials (401 response).
       Include a "Sign in with Google" button that navigates to GET /auth/google (the backend
       redirect endpoint). Link to /register.
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -114,7 +114,7 @@ todos:
 | ✅ Done | AuthContext + useAuth hook |
 | ✅ Done | RequireAuth route guard |
 | ✅ Done | Router (public + authenticated routes) |
-| ⏳ Pending | LoginPage (email/password + Google button) |
+| ✅ Done | LoginPage (email/password + Google button) |
 | ⏳ Pending | RegisterPage |
 | ⏳ Pending | GoogleCallbackPage (OIDC return handler) |
 | ⏳ Pending | Auth tests |
