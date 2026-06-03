@@ -45,7 +45,7 @@ todos:
       CircularProgress (not null, not a redirect). Once resolved, redirect to /login if not
       authenticated; otherwise render the child outlet. This prevents redirect flicker on hard
       refresh for authenticated users.
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -112,7 +112,7 @@ todos:
 | ✅ Done | Axios client + 401 refresh interceptor |
 | ✅ Done | Auth API functions (login, register, logout, getMe) |
 | ✅ Done | AuthContext + useAuth hook |
-| ⏳ Pending | RequireAuth route guard |
+| ✅ Done | RequireAuth route guard |
 | ⏳ Pending | Router (public + authenticated routes) |
 | ⏳ Pending | LoginPage (email/password + Google button) |
 | ⏳ Pending | RegisterPage |
