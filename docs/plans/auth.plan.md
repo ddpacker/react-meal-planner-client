@@ -13,7 +13,7 @@ todos:
       replay queued requests. If the refresh call itself fails (refresh token expired or
       revoked), flush the queue with errors and redirect to /login. Do not set
       withCredentials — requests are same-origin.
-    status: pending
+    status: completed
 
   - id: auth-api
     content: >
@@ -24,7 +24,7 @@ todos:
         refreshToken() -> void (used internally by interceptor)
         getMe() -> UserRead
       All use the shared Axios instance from client.ts.
-    status: pending
+    status: completed
     dependencies:
       - axios-client
 
@@ -35,7 +35,7 @@ todos:
       useQuery on GET /users/me — success means authenticated, 401 means not authenticated.
       isLoading is true while the /users/me query is in flight. On logout, call
       POST /auth/logout, clear the query cache, and navigate to /login.
-    status: pending
+    status: completed
     dependencies:
       - auth-api
 
@@ -45,7 +45,7 @@ todos:
       CircularProgress (not null, not a redirect). Once resolved, redirect to /login if not
       authenticated; otherwise render the child outlet. This prevents redirect flicker on hard
       refresh for authenticated users.
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -55,7 +55,7 @@ todos:
       <RequireAuth>. Public routes: /login, /register, /auth/google/callback.
       Authenticated routes: /, /meal-plans/:id, /recipes, /recipes/:id,
       /grocery/:listId, /profile. Wire into src/main.tsx via RouterProvider.
-    status: pending
+    status: completed
     dependencies:
       - require-auth
 
@@ -65,7 +65,7 @@ todos:
       On success, navigate to /. Show inline error for invalid credentials (401 response).
       Include a "Sign in with Google" button that navigates to GET /auth/google (the backend
       redirect endpoint). Link to /register.
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -74,7 +74,7 @@ todos:
       Create src/pages/RegisterPage.tsx. Email + password + confirm-password form using
       React Hook Form + Zod. On success, auto-login and navigate to /. Show inline error
       for duplicate email (409 response). Link to /login.
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -84,7 +84,7 @@ todos:
       and sets the JWT cookie before redirecting to this page. On mount, call GET /users/me
       to confirm the session is live, then navigate to /. Show an error state if /users/me
       fails (the Google flow failed server-side).
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -98,7 +98,7 @@ todos:
       - Axios interceptor: single refresh fires on concurrent 401s; redirect on refresh failure.
       Use renderWithProviders with authState overrides; MSW handlers for /auth/login, /auth/register,
       /auth/refresh, /users/me.
-    status: pending
+    status: completed
     dependencies:
       - login-page
       - register-page
@@ -109,15 +109,15 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | Axios client + 401 refresh interceptor |
-| ⏳ Pending | Auth API functions (login, register, logout, getMe) |
-| ⏳ Pending | AuthContext + useAuth hook |
-| ⏳ Pending | RequireAuth route guard |
-| ⏳ Pending | Router (public + authenticated routes) |
-| ⏳ Pending | LoginPage (email/password + Google button) |
-| ⏳ Pending | RegisterPage |
-| ⏳ Pending | GoogleCallbackPage (OIDC return handler) |
-| ⏳ Pending | Auth tests |
+| ✅ Done | Axios client + 401 refresh interceptor |
+| ✅ Done | Auth API functions (login, register, logout, getMe) |
+| ✅ Done | AuthContext + useAuth hook |
+| ✅ Done | RequireAuth route guard |
+| ✅ Done | Router (public + authenticated routes) |
+| ✅ Done | LoginPage (email/password + Google button) |
+| ✅ Done | RegisterPage |
+| ✅ Done | GoogleCallbackPage (OIDC return handler) |
+| ✅ Done | Auth tests |
 
 ---
 

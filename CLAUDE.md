@@ -30,11 +30,8 @@ VITE_API_BASE_URL=http://localhost:8000
 
 ## Documentation
 
-- `docs/ARCHITECTURE.md` — component tree, routing, API integration layer, state management
-- `docs/SETUP.md` — full development setup including Vitest wiring
-- `docs/DEPLOYMENT.md` — Azure Static Web Apps deployment
-- `docs/INFRASTRUCTURE.md` — Azure resource provisioning
-- `docs/plans/` — feature implementation plans (auth, meal, recipe, chat, grocery, nutrition, user, infrastructure)
+@docs/ARCHITECTURE.md
+@docs/SETUP.md
 
 ## Coding standards
 

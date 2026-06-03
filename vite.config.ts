@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',
+    execArgv: ['--no-webstorage'],
     globals: true,
     setupFiles: './vitest.setup.ts',
     include: ['src/__tests__/**/*.{test,spec}.{ts,tsx}'],
