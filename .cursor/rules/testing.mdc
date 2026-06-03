@@ -4,6 +4,10 @@ globs: src/__tests__/**/*.{ts,tsx}
 alwaysApply: false
 ---
 
+## Testing
+- Every implementation task must be accompanied by vitest tests
+- Run tests after implementation and confirm they pass before marking a task done
+
 ## Testing stack
 
 - **Vitest** — test runner (configured in `vite.config.ts`).
