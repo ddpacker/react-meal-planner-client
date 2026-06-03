@@ -1,21 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { http, HttpResponse } from 'msw';
+import { API_BASE_URL, mockUser } from '../../../__mocks__/authHandlers';
 import { server } from '../../../__mocks__/server';
 import { getMe, login, logout, refreshToken, register } from '../../../lib/api/auth';
-
-const baseURL = 'http://localhost:8000';
-
-const mockUser = {
-  id: 1,
-  email: 'user@example.com',
-  created_at: '2024-01-01T00:00:00Z',
-};
 
 describe('auth API', () => {
   it('login posts email and password', async () => {
     let body: unknown;
     server.use(
-      http.post(`${baseURL}/auth/login`, async ({ request }) => {
+      http.post(`${API_BASE_URL}/auth/login`, async ({ request }) => {
         body = await request.json();
         return new HttpResponse(null, { status: 204 });
       }),
@@ -28,7 +21,7 @@ describe('auth API', () => {
   it('register posts email and password', async () => {
     let body: unknown;
     server.use(
-      http.post(`${baseURL}/auth/register`, async ({ request }) => {
+      http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
         body = await request.json();
         return new HttpResponse(null, { status: 201 });
       }),
@@ -41,7 +34,7 @@ describe('auth API', () => {
   it('logout posts to /auth/logout', async () => {
     let called = false;
     server.use(
-      http.post(`${baseURL}/auth/logout`, () => {
+      http.post(`${API_BASE_URL}/auth/logout`, () => {
         called = true;
         return new HttpResponse(null, { status: 204 });
       }),
@@ -54,7 +47,7 @@ describe('auth API', () => {
   it('refreshToken posts to /auth/refresh', async () => {
     let called = false;
     server.use(
-      http.post(`${baseURL}/auth/refresh`, () => {
+      http.post(`${API_BASE_URL}/auth/refresh`, () => {
         called = true;
         return new HttpResponse(null, { status: 200 });
       }),
@@ -66,7 +59,7 @@ describe('auth API', () => {
 
   it('getMe returns the current user', async () => {
     server.use(
-      http.get(`${baseURL}/users/me`, () => HttpResponse.json(mockUser)),
+      http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(mockUser)),
     );
 
     const user = await getMe();

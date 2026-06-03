@@ -4,17 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
+import { API_BASE_URL, mockUser } from '../../__mocks__/authHandlers';
 import { server } from '../../__mocks__/server';
 import { AuthProvider, useAuth } from '../../context/AuthContext';
 import { createTestQueryClient } from '../utils';
-
-const baseURL = 'http://localhost:8000';
-
-const mockUser = {
-  id: 1,
-  email: 'user@example.com',
-  created_at: '2024-01-01T00:00:00Z',
-};
 
 function AuthProbe() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -55,7 +48,7 @@ function renderAuthProvider(initialEntries = ['/login']) {
 
 describe('AuthProvider', () => {
   it('sets isLoading then isAuthenticated when /users/me succeeds', async () => {
-    server.use(http.get(`${baseURL}/users/me`, () => HttpResponse.json(mockUser)));
+    server.use(http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(mockUser)));
 
     renderAuthProvider(['/']);
 
@@ -70,10 +63,10 @@ describe('AuthProvider', () => {
 
   it('treats /users/me failure as unauthenticated', async () => {
     server.use(
-      http.get(`${baseURL}/users/me`, () =>
+      http.get(`${API_BASE_URL}/users/me`, () =>
         HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 }),
       ),
-      http.post(`${baseURL}/auth/refresh`, () =>
+      http.post(`${API_BASE_URL}/auth/refresh`, () =>
         HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 }),
       ),
     );
@@ -90,17 +83,17 @@ describe('AuthProvider', () => {
   it('login refetches /users/me and exposes the user', async () => {
     let meCalls = 0;
     server.use(
-      http.get(`${baseURL}/users/me`, () => {
+      http.get(`${API_BASE_URL}/users/me`, () => {
         meCalls += 1;
         if (meCalls === 1) {
           return HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 });
         }
         return HttpResponse.json(mockUser);
       }),
-      http.post(`${baseURL}/auth/refresh`, () =>
+      http.post(`${API_BASE_URL}/auth/refresh`, () =>
         HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 }),
       ),
-      http.post(`${baseURL}/auth/login`, () => new HttpResponse(null, { status: 204 })),
+      http.post(`${API_BASE_URL}/auth/login`, () => new HttpResponse(null, { status: 204 })),
     );
 
     function LoginTrigger() {
@@ -141,8 +134,8 @@ describe('AuthProvider', () => {
 
   it('logout clears session and navigates to /login', async () => {
     server.use(
-      http.get(`${baseURL}/users/me`, () => HttpResponse.json(mockUser)),
-      http.post(`${baseURL}/auth/logout`, () => new HttpResponse(null, { status: 204 })),
+      http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(mockUser)),
+      http.post(`${API_BASE_URL}/auth/logout`, () => new HttpResponse(null, { status: 204 })),
     );
 
     function LogoutTrigger() {

@@ -98,7 +98,7 @@ todos:
       - Axios interceptor: single refresh fires on concurrent 401s; redirect on refresh failure.
       Use renderWithProviders with authState overrides; MSW handlers for /auth/login, /auth/register,
       /auth/refresh, /users/me.
-    status: pending
+    status: completed
     dependencies:
       - login-page
       - register-page
@@ -117,7 +117,7 @@ todos:
 | ✅ Done | LoginPage (email/password + Google button) |
 | ✅ Done | RegisterPage |
 | ✅ Done | GoogleCallbackPage (OIDC return handler) |
-| ⏳ Pending | Auth tests |
+| ✅ Done | Auth tests |
 
 ---
 
