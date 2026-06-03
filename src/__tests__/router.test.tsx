@@ -1,24 +1,22 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { RouterProvider } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { server } from '../__mocks__/server';
-import { router } from '../router';
+import { createAppRoutes } from '../router';
 import { createTestQueryClient } from './utils';
 
 const baseURL = 'http://localhost:8000';
 
-async function renderApp(path: string) {
-  window.history.pushState({}, '', path);
+function renderApp(path: string) {
   const queryClient = createTestQueryClient();
-  const view = render(
+  const memoryRouter = createMemoryRouter(createAppRoutes(), { initialEntries: [path] });
+  return render(
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <RouterProvider router={memoryRouter} />
     </QueryClientProvider>,
   );
-  await router.navigate(path, { replace: true });
-  return view;
 }
 
 afterEach(() => {
@@ -39,7 +37,7 @@ function useUnauthenticatedSessionHandlers() {
 describe('router', () => {
   it('renders the login page at /login', async () => {
     useUnauthenticatedSessionHandlers();
-    await renderApp('/login');
+    renderApp('/login');
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument();
@@ -48,7 +46,7 @@ describe('router', () => {
 
   it('redirects unauthenticated users from / to /login', async () => {
     useUnauthenticatedSessionHandlers();
-    await renderApp('/');
+    renderApp('/');
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument();
@@ -66,7 +64,7 @@ describe('router', () => {
       ),
     );
 
-    await renderApp('/');
+    renderApp('/');
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /meal plans/i })).toBeInTheDocument();

@@ -98,8 +98,7 @@ describe('LoginPage', () => {
 
   it('redirects to Google sign-in', async () => {
     useUnauthenticatedSessionHandlers();
-    const assignSpy = vi.fn();
-    vi.stubGlobal('location', { assign: assignSpy });
+    const assignSpy = vi.mocked(window.location.assign);
 
     const user = userEvent.setup();
     renderLoginPage();
@@ -107,7 +106,6 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: /sign in with google/i }));
 
     expect(assignSpy).toHaveBeenCalledWith(`${baseURL}/auth/google`);
-    vi.unstubAllGlobals();
   });
 
   it('links to the register page', () => {
