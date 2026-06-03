@@ -35,7 +35,7 @@ todos:
       useQuery on GET /users/me — success means authenticated, 401 means not authenticated.
       isLoading is true while the /users/me query is in flight. On logout, call
       POST /auth/logout, clear the query cache, and navigate to /login.
-    status: pending
+    status: completed
     dependencies:
       - auth-api
 
@@ -111,7 +111,7 @@ todos:
 |--------|------|
 | ✅ Done | Axios client + 401 refresh interceptor |
 | ✅ Done | Auth API functions (login, register, logout, getMe) |
-| ⏳ Pending | AuthContext + useAuth hook |
+| ✅ Done | AuthContext + useAuth hook |
 | ⏳ Pending | RequireAuth route guard |
 | ⏳ Pending | Router (public + authenticated routes) |
 | ⏳ Pending | LoginPage (email/password + Google button) |
