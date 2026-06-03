@@ -74,7 +74,7 @@ todos:
       Create src/pages/RegisterPage.tsx. Email + password + confirm-password form using
       React Hook Form + Zod. On success, auto-login and navigate to /. Show inline error
       for duplicate email (409 response). Link to /login.
-    status: pending
+    status: completed
     dependencies:
       - auth-context
 
@@ -115,7 +115,7 @@ todos:
 | ✅ Done | RequireAuth route guard |
 | ✅ Done | Router (public + authenticated routes) |
 | ✅ Done | LoginPage (email/password + Google button) |
-| ⏳ Pending | RegisterPage |
+| ✅ Done | RegisterPage |
 | ⏳ Pending | GoogleCallbackPage (OIDC return handler) |
 | ⏳ Pending | Auth tests |
 
