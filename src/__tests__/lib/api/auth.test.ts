@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { API_BASE_URL, mockUser } from '../../../__mocks__/authHandlers';
 import { server } from '../../../__mocks__/server';
-import { getMe, login, logout, refreshToken, register } from '../../../lib/api/auth';
+import { login, logout, refreshToken, register } from '../../../lib/api/auth';
+import { fetchMe } from '../../../lib/api/user';
 import { setAccessToken } from '../../../lib/api/client';
 
 describe('auth API', () => {
@@ -35,7 +36,7 @@ describe('auth API', () => {
         return HttpResponse.json(mockUser);
       }),
     );
-    await getMe();
+    await fetchMe();
     expect(authHeader).toBe('Bearer my-token');
   });
 
@@ -54,7 +55,7 @@ describe('auth API', () => {
         return HttpResponse.json(mockUser);
       }),
     );
-    await getMe();
+    await fetchMe();
     expect(authHeader).toBeNull();
   });
 
@@ -95,14 +96,5 @@ describe('auth API', () => {
 
     await refreshToken();
     expect(called).toBe(true);
-  });
-
-  it('getMe returns the current user', async () => {
-    server.use(
-      http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(mockUser)),
-    );
-
-    const user = await getMe();
-    expect(user).toEqual(mockUser);
   });
 });

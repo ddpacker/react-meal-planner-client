@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMe } from '../lib/api/auth';
+import { fetchMe } from '../lib/api/user';
 import { userKeys } from '../lib/queryKeys';
 
 export function useMe() {
   return useQuery({
     queryKey: userKeys.me(),
-    queryFn: getMe,
+    queryFn: fetchMe,
     retry: false,
   });
 }
