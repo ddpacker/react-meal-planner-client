@@ -46,7 +46,7 @@ todos:
         useUpdateMe() — useMutation; onSuccess: invalidate me()
         useUpdatePreferences() — useMutation; onSuccess: invalidate preferences()
         useDeleteMe() — useMutation; onSuccess: logout() + navigate to /login
-    status: pending
+    status: completed
     dependencies:
       - user-query-keys
 
@@ -97,7 +97,7 @@ todos:
 | ✅ Done | TypeScript types (UserRead, UserUpdate, UserPreferences) |
 | ✅ Done | User API functions |
 | ✅ Done | Query keys |
-| ⏳ Pending | Custom hooks |
+| ✅ Done | Custom hooks |
 | ⏳ Pending | Unit system context (extend AuthContext or separate PreferencesContext) |
 | ⏳ Pending | ProfilePage (email, password, unit preference, delete) |
 | ⏳ Pending | Tests |

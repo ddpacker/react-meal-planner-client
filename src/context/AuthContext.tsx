@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { login as apiLogin, logout as apiLogout } from '../lib/api/auth';
 import { userKeys } from '../lib/queryKeys';
-import { useMe } from '../hooks/useMe';
+import { useMe } from '../hooks/useUser';
 import type { UserRead } from '../types/user';
 
 export type AuthContextValue = {
