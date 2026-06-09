@@ -6,6 +6,7 @@ import {
   AuthContext,
   type AuthContextValue,
 } from '../context/AuthContext';
+import { AppThemeProvider } from '../lib/theme/AppThemeProvider';
 import type { UserRead } from '../types/user';
 
 export function createTestQueryClient() {
@@ -51,13 +52,15 @@ export function renderWithProviders(
   return render(ui, {
     ...renderOptions,
     wrapper: ({ children }) => (
-      <MemoryRouter initialEntries={initialEntries}>
-        <QueryClientProvider client={queryClient}>
-          <AuthContext.Provider value={authValue}>
-            {children}
-          </AuthContext.Provider>
-        </QueryClientProvider>
-      </MemoryRouter>
+      <AppThemeProvider>
+        <MemoryRouter initialEntries={initialEntries}>
+          <QueryClientProvider client={queryClient}>
+            <AuthContext.Provider value={authValue}>
+              {children}
+            </AuthContext.Provider>
+          </QueryClientProvider>
+        </MemoryRouter>
+      </AppThemeProvider>
     ),
   });
 }

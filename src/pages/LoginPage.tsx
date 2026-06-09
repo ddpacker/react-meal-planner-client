@@ -3,7 +3,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Alert, Button, TextField } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  PageHarness,
+  PageHarnessFooter,
+  PageHarnessForm,
+  PageHarnessHeader,
+  PageHarnessLink,
+} from '../components/layout/PageHarness';
 import { useAuth } from '../context/AuthContext';
 
 const loginSchema = z.object({
@@ -60,19 +67,13 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Sign in</h1>
-        <p className="text-sm text-gray-600">
-          Welcome back. Sign in to plan your meals.
-        </p>
-      </div>
+    <PageHarness>
+      <PageHarnessHeader
+        title="Sign in"
+        description="Welcome back. Sign in to plan your meals."
+      />
 
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-      >
+      <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
         {credentialsError ? (
           <Alert severity="error">{credentialsError}</Alert>
         ) : null}
@@ -81,6 +82,7 @@ export default function LoginPage() {
           label="Email"
           type="email"
           autoComplete="email"
+          fullWidth
           error={Boolean(errors.email)}
           helperText={errors.email?.message}
           {...register('email')}
@@ -90,26 +92,38 @@ export default function LoginPage() {
           label="Password"
           type="password"
           autoComplete="current-password"
+          fullWidth
           error={Boolean(errors.password)}
           helperText={errors.password?.message}
           {...register('password')}
         />
 
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          size="large"
+          fullWidth
+          disabled={isSubmitting}
+        >
           Sign in
         </Button>
-      </form>
+      </PageHarnessForm>
 
-      <Button variant="outlined" onClick={signInWithGoogle}>
+      <Button
+        variant="outlined"
+        color="secondary"
+        size="large"
+        fullWidth
+        onClick={signInWithGoogle}
+      >
         Sign in with Google
       </Button>
 
-      <p className="text-center text-sm text-gray-600">
+      <PageHarnessFooter>
         Don&apos;t have an account?{' '}
-        <Link to="/register" className="font-medium text-blue-600 hover:underline">
-          Create one
-        </Link>
-      </p>
-    </main>
+        <PageHarnessLink to="/register">Create one</PageHarnessLink>
+      </PageHarnessFooter>
+    </PageHarness>
   );
 }

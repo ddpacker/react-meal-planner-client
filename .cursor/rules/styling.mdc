@@ -1,6 +1,6 @@
 ---
-description: Tailwind CSS v4 + MUI v9 styling conventions — when to use each, layout rules, and overrides. Active when editing components/ or pages/.
-globs: src/components/**/*.tsx,src/pages/**/*.tsx
+description: Tailwind CSS v4 + MUI v9 styling conventions — theme tokens, PageHarness layout, and when to use each. Active when editing components/, pages/, or lib/theme/.
+globs: src/components/**/*.tsx,src/pages/**/*.tsx,src/lib/theme/**/*
 alwaysApply: false
 ---
 
@@ -13,16 +13,113 @@ This project uses Tailwind CSS v4 and MUI v9 together:
 
 Use the right tool for the job. Do not rebuild MUI primitives from scratch with Tailwind, and do not fight MUI's structure with deep Tailwind overrides.
 
+## App theme (required on every new feature)
+
+All new pages and components must use the shared theme — never introduce ad-hoc colours or one-off layout shells.
+
+**Source of truth:** `src/lib/theme/tokens.ts`
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `background` | `#FAF3DD` | Page backgrounds |
+| `primary` | `#053B06` | Headings, primary actions, primary text |
+| `secondary` | `#6E9075` | Supporting copy, secondary actions |
+
+**Supporting files:**
+
+- `src/lib/theme/muiTheme.ts` — MUI `createTheme` (palette, typography, component overrides)
+- `src/lib/theme/AppThemeProvider.tsx` — wraps the app; already mounted in `main.tsx`
+- `src/index.css` — Tailwind `@theme inline` maps semantic utilities to CSS vars (`--mp-*`)
+
+**Adding or changing colours:**
+
+1. Update `brandColors` / `semanticColors` / `brandAlpha` in `tokens.ts`
+2. Mirror new CSS vars in `cssVariableDefinitions` and `@theme inline` in `index.css`
+3. Extend `muiTheme.ts` if MUI palette slots need updating
+
+**Consuming colours:**
+
+- **MUI components** — `color="primary"`, `color="secondary"`, or `sx` with theme tokens (`color: 'text.secondary'`, `bgcolor: 'background.paper'`)
+- **Non-MUI elements** — Tailwind semantic utilities: `bg-background`, `text-primary`, `text-secondary`, `border-border`, `bg-primary-subtle`
+- **Transparency** — use `brandAlpha` or `brandColorWithAlpha()` from `tokens.ts`; do not hand-roll `rgba(...)`
+
+```tsx
+// Correct — theme tokens
+<p className="text-sm text-secondary">Supporting copy</p>
+<Button variant="contained" color="primary">Save</Button>
+
+// Wrong — hardcoded or generic palette colours
+<p className="text-sm text-gray-600">Supporting copy</p>
+<Button sx={{ bgcolor: '#053B06' }}>Save</Button>
+```
+
+Do not hardcode hex values in pages or components. Do not use generic Tailwind palette classes (`text-slate-700`, `bg-blue-600`, etc.) when a semantic token exists.
+
+## PageHarness (required for standalone card pages)
+
+For centered, card-based pages (auth, onboarding, password reset, and similar standalone flows), use **`PageHarness`** from `src/components/layout/PageHarness.tsx`. Do not hand-roll `<main>` + `Paper` layouts.
+
+**Canonical examples:** `LoginPage`, `RegisterPage`
+
+| Component | Purpose |
+|-----------|---------|
+| `PageHarness` | Root wrapper — full-viewport background + centered card (`maxWidth`: `sm` \| `md` \| `lg`) |
+| `PageHarnessHeader` | Title + optional description |
+| `PageHarnessForm` | Form with standard field spacing (`gap-5`) |
+| `PageHarnessFooter` | Centered footer copy |
+| `PageHarnessLink` | Themed react-router link |
+
+```tsx
+// Correct — new standalone card page
+import {
+  PageHarness,
+  PageHarnessFooter,
+  PageHarnessForm,
+  PageHarnessHeader,
+  PageHarnessLink,
+} from '../components/layout/PageHarness';
+
+export default function ResetPasswordPage() {
+  return (
+    <PageHarness>
+      <PageHarnessHeader title="Reset password" description="We'll email you a link." />
+      <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
+        <TextField label="Email" fullWidth />
+        <Button type="submit" variant="contained" color="primary" size="large" fullWidth>
+          Send link
+        </Button>
+      </PageHarnessForm>
+      <PageHarnessFooter>
+        <PageHarnessLink to="/login">Back to sign in</PageHarnessLink>
+      </PageHarnessFooter>
+    </PageHarness>
+  );
+}
+
+// Wrong — bespoke layout duplicating the harness
+<main className="flex min-h-screen items-center justify-center bg-[#FAF3DD]">
+  <Paper className="p-8">...</Paper>
+</main>
+```
+
+**Inside the harness:**
+
+- Use MUI `TextField` / `Button` with `fullWidth`, `size="large"`, and `color="primary"` or `color="secondary"`
+- Place optional secondary actions (e.g. OAuth buttons) as siblings between `PageHarnessForm` and `PageHarnessFooter`
+- Do not re-style the card, header, or footer — extend the harness components if the design system needs new slots
+
+**Authenticated app pages** (lists, detail views, dashboards) do not use `PageHarness`. They still must use theme tokens for all colour and typography. When an app-level shell exists (`AppShell` or similar), use that instead of inventing a new page wrapper.
+
 ## Tailwind
 
 - Apply Tailwind classes directly on JSX elements for layout and spacing.
 - Use Tailwind for `flex`, `grid`, `gap`, `p-*`, `m-*`, `text-*`, `font-*`, `rounded-*`, `border`, `shadow`.
 - Use responsive prefixes (`sm:`, `md:`, `lg:`) for breakpoints — do not write media queries manually.
-- Use Tailwind's `dark:` variant for dark mode where applicable.
-- Do not use arbitrary values (`w-[347px]`) unless a design token genuinely doesn't exist.
+- Prefer semantic colour utilities (`text-primary`, `bg-background`) over generic palette names.
+- Do not use arbitrary values (`w-[347px]`, `bg-[#FAF3DD]`) unless a design token genuinely doesn't exist.
 
 ```tsx
-// Correct — Tailwind for layout
+// Correct — Tailwind for layout, semantic colours
 <div className="flex flex-col gap-4 p-6 max-w-2xl mx-auto">
   <RecipeCard recipe={recipe} />
 </div>
@@ -35,23 +132,23 @@ Use the right tool for the job. Do not rebuild MUI primitives from scratch with 
 
 - Import MUI components from `@mui/material`.
 - Use the `size` and `variant` props instead of overriding dimensions manually.
-- For minor visual tweaks on MUI components, prefer the `sx` prop over adding a Tailwind class on the MUI component root.
-- Do not wrap a MUI `Button` in a `<div>` just to add spacing — use Tailwind on the surrounding container.
+- For minor visual tweaks on MUI components, prefer the `sx` prop with theme tokens over adding a Tailwind class on the MUI component root.
+- Do not wrap a MUI `Button` in a `<div>` just to add spacing — use Tailwind on the surrounding container or harness slots.
 
 ```tsx
 // Correct
-<Button variant="contained" size="small" onClick={onSave}>
+<Button variant="contained" color="primary" size="large" fullWidth>
   Save recipe
 </Button>
 
 // Wrong — reimplementing what MUI already provides
-<button className="bg-blue-600 text-white px-4 py-2 rounded">Save recipe</button>
+<button className="bg-green-900 text-white px-4 py-2 rounded">Save recipe</button>
 ```
 
 ## MUI + Tailwind conflict avoidance
 
 - MUI renders with Emotion; Tailwind injects via the Vite plugin. Specificity conflicts are rare but can occur.
-- If a Tailwind class on a MUI component root has no effect, use `sx` instead.
+- If a Tailwind class on a MUI component root has no effect, use `sx` with theme tokens instead.
 - Do not apply MUI `sx` for layout concerns that Tailwind handles — keep concerns separated.
 
 ```tsx
@@ -68,14 +165,11 @@ Use the right tool for the job. Do not rebuild MUI primitives from scratch with 
 <TextField className="mt-4 w-full" sx={{ marginTop: '16px' }} />
 ```
 
-## Colour and typography
-
-- Use Tailwind colour utilities (`text-slate-700`, `bg-amber-50`, etc.) on non-MUI elements.
-- For MUI components, use the MUI theme or `sx` with theme tokens (`color: 'text.secondary'`).
-- Do not hardcode hex values — use Tailwind's palette or MUI's theme.
-
 ## Do not
 
+- Do not hardcode hex colours or use generic Tailwind palette classes where semantic tokens exist.
+- Do not build standalone card pages without `PageHarness` — extend the harness if a new slot is needed.
+- Do not add colours outside `src/lib/theme/tokens.ts`.
 - Do not use the `style` prop for anything Tailwind or MUI can handle.
 - Do not import `@emotion/react` or `@emotion/styled` directly — MUI manages Emotion internally.
 - Do not create custom CSS files for component-level styles; use Tailwind utilities instead.
