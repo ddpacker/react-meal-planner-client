@@ -16,7 +16,7 @@ import {
 } from '../__mocks__/authHandlers';
 import { server } from '../__mocks__/server';
 import { RequireAuth } from '../components/RequireAuth';
-import { apiClient } from '../lib/api/client';
+import { apiClient, clearAccessToken, setAccessToken } from '../lib/api/client';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import { renderAuthApp } from './auth/renderAuthApp';
@@ -173,6 +173,7 @@ describe('auth flow', () => {
     beforeEach(() => {
       window.location.pathname = '/recipes';
       locationAssign.mockClear();
+      setAccessToken('expired-token');
     });
 
     it('sends only one refresh for concurrent 401 responses', async () => {
@@ -195,7 +196,7 @@ describe('auth flow', () => {
         }),
         http.post(`${API_BASE_URL}/auth/refresh`, () => {
           callCounts.refresh += 1;
-          return HttpResponse.json(null, { status: 200 });
+          return HttpResponse.json({ access_token: 'new-token', token_type: 'bearer' });
         }),
       );
 
@@ -243,6 +244,7 @@ describe('auth flow', () => {
     });
 
     it('does not refresh auth endpoints', async () => {
+      clearAccessToken();
       let refreshCalls = 0;
 
       server.use(

@@ -14,7 +14,7 @@ todos:
         UserPreferencesRead (unit_system: 'metric' | 'imperial')
         UserPreferencesUpdate (unit_system: 'metric' | 'imperial')
         UnitSystem = 'metric' | 'imperial'
-    status: pending
+    status: completed
 
   - id: user-api
     content: >
@@ -24,7 +24,7 @@ todos:
         deleteMe(password: string) -> void
         fetchPreferences() -> UserPreferencesRead
         updatePreferences(body: UserPreferencesUpdate) -> UserPreferencesRead
-    status: pending
+    status: completed
     dependencies:
       - user-types
 
@@ -34,7 +34,7 @@ todos:
         me(), preferences()
       Note: /users/me is already queried in AuthContext. Reuse the same query key so the
       profile page reads from the cache rather than issuing a duplicate request.
-    status: pending
+    status: completed
     dependencies:
       - user-api
 
@@ -46,7 +46,7 @@ todos:
         useUpdateMe() — useMutation; onSuccess: invalidate me()
         useUpdatePreferences() — useMutation; onSuccess: invalidate preferences()
         useDeleteMe() — useMutation; onSuccess: logout() + navigate to /login
-    status: pending
+    status: completed
     dependencies:
       - user-query-keys
 
@@ -58,7 +58,7 @@ todos:
         b) Create a separate PreferencesContext.
       Recommendation: extend AuthContext with unitSystem: UnitSystem (default 'metric').
       The formatQuantity(value, unit, unitSystem) utility is then called with the context value.
-    status: pending
+    status: completed
     dependencies:
       - user-hooks
 
@@ -72,7 +72,7 @@ todos:
            Calls useUpdatePreferences() on change; no save button needed (auto-save).
         4. Danger zone: "Delete account" button that opens a confirmation Dialog requiring
            the user to type their password before calling useDeleteMe().
-    status: pending
+    status: completed
     dependencies:
       - unit-system-context
 
@@ -85,7 +85,7 @@ todos:
         - useDeleteMe: calls logout() and navigates to /login on success.
       MSW handlers for GET /users/me, PATCH /users/me, GET/PATCH /users/me/preferences,
       DELETE /users/me.
-    status: pending
+    status: completed
     dependencies:
       - profile-page
 ---
@@ -94,13 +94,13 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | TypeScript types (UserRead, UserUpdate, UserPreferences) |
-| ⏳ Pending | User API functions |
-| ⏳ Pending | Query keys |
-| ⏳ Pending | Custom hooks |
-| ⏳ Pending | Unit system context (extend AuthContext or separate PreferencesContext) |
-| ⏳ Pending | ProfilePage (email, password, unit preference, delete) |
-| ⏳ Pending | Tests |
+| ✅ Done | TypeScript types (UserRead, UserUpdate, UserPreferences) |
+| ✅ Done | User API functions |
+| ✅ Done | Query keys |
+| ✅ Done | Custom hooks |
+| ✅ Done | Unit system context (extend AuthContext or separate PreferencesContext) |
+| ✅ Done | ProfilePage (email, password, unit preference, delete) |
+| ✅ Done | Tests |
 
 ---
 

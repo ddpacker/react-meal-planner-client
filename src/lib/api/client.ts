@@ -1,5 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { getAccessToken } from './accessToken';
+import { usesBearerTokenAuth } from './authMode';
 import { refreshToken } from './auth';
+import { resolveApiBaseURL } from './baseUrl';
+
+export { clearAccessToken, setAccessToken } from './accessToken';
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -8,19 +13,20 @@ type QueueEntry = {
   reject: (reason: unknown) => void;
 };
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
-
-let _accessToken: string | null = null;
-export function setAccessToken(token: string): void { _accessToken = token; }
-export function clearAccessToken(): void { _accessToken = null; }
+const baseURL = resolveApiBaseURL();
 
 export const apiClient = axios.create({
   baseURL,
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
-  if (_accessToken) {
-    config.headers.Authorization = `Bearer ${_accessToken}`;
+  if (!usesBearerTokenAuth()) {
+    return config;
+  }
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -55,6 +61,13 @@ function flushQueue(error: unknown | null): void {
   });
 }
 
+function shouldAttemptRefresh(): boolean {
+  if (usesBearerTokenAuth()) {
+    return Boolean(getAccessToken());
+  }
+  return true;
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -65,6 +78,11 @@ apiClient.interceptors.response.use(
     }
 
     if (isAuthEndpoint(originalRequest.url)) {
+      return Promise.reject(error);
+    }
+
+    if (!shouldAttemptRefresh()) {
+      redirectToLogin();
       return Promise.reject(error);
     }
 
