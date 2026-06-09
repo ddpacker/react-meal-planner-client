@@ -72,7 +72,7 @@ todos:
            Calls useUpdatePreferences() on change; no save button needed (auto-save).
         4. Danger zone: "Delete account" button that opens a confirmation Dialog requiring
            the user to type their password before calling useDeleteMe().
-    status: pending
+    status: completed
     dependencies:
       - unit-system-context
 
@@ -99,7 +99,7 @@ todos:
 | ✅ Done | Query keys |
 | ✅ Done | Custom hooks |
 | ✅ Done | Unit system context (extend AuthContext or separate PreferencesContext) |
-| ⏳ Pending | ProfilePage (email, password, unit preference, delete) |
+| ✅ Done | ProfilePage (email, password, unit preference, delete) |
 | ⏳ Pending | Tests |
 
 ---
