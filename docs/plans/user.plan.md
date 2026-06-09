@@ -85,7 +85,7 @@ todos:
         - useDeleteMe: calls logout() and navigates to /login on success.
       MSW handlers for GET /users/me, PATCH /users/me, GET/PATCH /users/me/preferences,
       DELETE /users/me.
-    status: pending
+    status: completed
     dependencies:
       - profile-page
 ---
@@ -100,7 +100,7 @@ todos:
 | ✅ Done | Custom hooks |
 | ✅ Done | Unit system context (extend AuthContext or separate PreferencesContext) |
 | ✅ Done | ProfilePage (email, password, unit preference, delete) |
-| ⏳ Pending | Tests |
+| ✅ Done | Tests |
 
 ---
 
