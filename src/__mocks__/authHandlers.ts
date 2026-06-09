@@ -76,7 +76,9 @@ export function applyRegisterConflictHandlers(): void {
 
 export function applyRefreshSuccessHandlers(): void {
   server.use(
-    http.post(`${API_BASE_URL}/auth/refresh`, () => HttpResponse.json(null, { status: 200 })),
+    http.post(`${API_BASE_URL}/auth/refresh`, () =>
+      HttpResponse.json({ access_token: 'refreshed-token', token_type: 'bearer' }),
+    ),
   );
 }
 

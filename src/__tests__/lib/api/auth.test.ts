@@ -72,6 +72,26 @@ describe('auth API', () => {
     expect(body).toEqual({ email: 'new@example.com', password: 'secret' });
   });
 
+  it('register stores access_token from response', async () => {
+    server.use(
+      http.post(`${API_BASE_URL}/auth/register`, () =>
+        HttpResponse.json({ access_token: 'register-token', token_type: 'bearer' }, { status: 201 }),
+      ),
+    );
+
+    await register('new@example.com', 'secret');
+
+    let authHeader: string | null = null;
+    server.use(
+      http.get(`${API_BASE_URL}/users/me`, ({ request }) => {
+        authHeader = request.headers.get('Authorization');
+        return HttpResponse.json(mockUser);
+      }),
+    );
+    await fetchMe();
+    expect(authHeader).toBe('Bearer register-token');
+  });
+
   it('logout posts to /auth/logout', async () => {
     let called = false;
     server.use(
@@ -85,16 +105,23 @@ describe('auth API', () => {
     expect(called).toBe(true);
   });
 
-  it('refreshToken posts to /auth/refresh', async () => {
-    let called = false;
+  it('refreshToken stores access_token from response', async () => {
     server.use(
-      http.post(`${API_BASE_URL}/auth/refresh`, () => {
-        called = true;
-        return new HttpResponse(null, { status: 200 });
-      }),
+      http.post(`${API_BASE_URL}/auth/refresh`, () =>
+        HttpResponse.json({ access_token: 'refreshed-token', token_type: 'bearer' }),
+      ),
     );
 
     await refreshToken();
-    expect(called).toBe(true);
+
+    let authHeader: string | null = null;
+    server.use(
+      http.get(`${API_BASE_URL}/users/me`, ({ request }) => {
+        authHeader = request.headers.get('Authorization');
+        return HttpResponse.json(mockUser);
+      }),
+    );
+    await fetchMe();
+    expect(authHeader).toBe('Bearer refreshed-token');
   });
 });

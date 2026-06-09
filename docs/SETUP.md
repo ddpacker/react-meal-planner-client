@@ -24,7 +24,16 @@ Create `.env.local` in the project root:
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
-Do not commit `.env.local`. The checked-in `.env` contains only the default `http://localhost:8000` value, which is safe — `VITE_*` variables are public build-time values. Never put API keys or secrets in `.env` files with a `VITE_` prefix.
+### Auth by environment
+
+| Build | Auth mechanism |
+|-------|----------------|
+| `npm run dev` (development) | Bearer token from login/register JSON, stored in `sessionStorage`, sent as `Authorization: Bearer …` |
+| `npm run build` (production) | HttpOnly cookies only — no token storage; browser sends cookies on same-origin requests |
+
+In development, ensure your API allows `http://localhost:5173` with `Access-Control-Allow-Credentials: true`. In production, the SPA and API must share the same origin (Azure Front Door) so HttpOnly cookies work.
+
+Do not commit `.env.local`. In production, `VITE_API_BASE_URL` must point at the public origin (routed through Azure Front Door). Never put API keys or secrets in `.env` files with a `VITE_` prefix.
 
 ---
 

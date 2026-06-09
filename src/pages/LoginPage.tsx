@@ -23,7 +23,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
+import { resolveApiBaseURL } from '../lib/api/baseUrl';
 
 function isUnauthorized(error: unknown): boolean {
   return (
@@ -63,7 +63,7 @@ export default function LoginPage() {
   };
 
   const signInWithGoogle = () => {
-    window.location.assign(`${apiBaseUrl}/auth/google`);
+    window.location.assign(`${resolveApiBaseURL()}/auth/google`);
   };
 
   return (
