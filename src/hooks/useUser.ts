@@ -19,10 +19,11 @@ export function useMe() {
   });
 }
 
-export function usePreferences() {
+export function usePreferences({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: userKeys.preferences(),
     queryFn: fetchPreferences,
+    enabled,
   });
 }
 

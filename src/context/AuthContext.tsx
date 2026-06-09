@@ -9,13 +9,14 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { login as apiLogin, logout as apiLogout } from '../lib/api/auth';
 import { userKeys } from '../lib/queryKeys';
-import { useMe } from '../hooks/useUser';
-import type { UserRead } from '../types/user';
+import { useMe, usePreferences } from '../hooks/useUser';
+import type { UnitSystem, UserRead } from '../types/user';
 
 export type AuthContextValue = {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: UserRead | null;
+  unitSystem: UnitSystem;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -30,11 +31,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const meQuery = useMe();
+  const preferencesQuery = usePreferences({ enabled: meQuery.isSuccess });
 
   const login = useCallback(
     async (email: string, password: string) => {
       await apiLogin(email, password);
-      await queryClient.refetchQueries({ queryKey: userKeys.me() });
+      await queryClient.refetchQueries({ queryKey: userKeys.all });
     },
     [queryClient],
   );
@@ -50,10 +52,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: meQuery.isSuccess,
       isLoading: meQuery.isPending,
       user: meQuery.data ?? null,
+      unitSystem: preferencesQuery.data?.unit_system ?? 'metric',
       login,
       logout,
     }),
-    [meQuery.isSuccess, meQuery.isPending, meQuery.data, login, logout],
+    [
+      meQuery.isSuccess,
+      meQuery.isPending,
+      meQuery.data,
+      preferencesQuery.data?.unit_system,
+      login,
+      logout,
+    ],
   );
 
   return (

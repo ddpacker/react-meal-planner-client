@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { UserRead } from '../types/user';
+import type { UnitSystem, UserRead } from '../types/user';
 import { server } from './server';
 
 export const API_BASE_URL = 'http://localhost:8000';
@@ -23,9 +23,13 @@ export function applyUnauthenticatedSessionHandlers(): void {
 
 export function applyAuthenticatedSessionHandlers(
   user: UserRead = mockUser,
+  unitSystem: UnitSystem = 'metric',
 ): void {
   server.use(
     http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(user)),
+    http.get(`${API_BASE_URL}/users/me/preferences`, () =>
+      HttpResponse.json({ unit_system: unitSystem }),
+    ),
   );
 }
 
@@ -35,6 +39,9 @@ export function applyLoginSuccessHandlers(user: UserRead = mockUser): void {
       HttpResponse.json({ access_token: 'test-access-token', token_type: 'bearer' }),
     ),
     http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(user)),
+    http.get(`${API_BASE_URL}/users/me/preferences`, () =>
+      HttpResponse.json({ unit_system: 'metric' }),
+    ),
   );
 }
 
@@ -53,6 +60,9 @@ export function applyRegisterSuccessHandlers(user: UserRead): void {
       HttpResponse.json({ access_token: 'test-access-token', token_type: 'bearer' }),
     ),
     http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(user)),
+    http.get(`${API_BASE_URL}/users/me/preferences`, () =>
+      HttpResponse.json({ unit_system: 'metric' }),
+    ),
   );
 }
 

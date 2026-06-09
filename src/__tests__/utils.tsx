@@ -45,6 +45,7 @@ export function renderWithProviders(
     user: authState.isAuthenticated
       ? (authState.user ?? mockUser)
       : (authState.user ?? null),
+    unitSystem: authState.unitSystem ?? 'metric',
     login: authState.login ?? (async () => {}),
     logout: authState.logout ?? (async () => {}),
   };

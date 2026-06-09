@@ -10,12 +10,13 @@ import { AuthProvider, useAuth } from '../../context/AuthContext';
 import { createTestQueryClient } from '../utils';
 
 function AuthProbe() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, unitSystem } = useAuth();
   return (
     <div>
       <span data-testid="loading">{String(isLoading)}</span>
       <span data-testid="authenticated">{String(isAuthenticated)}</span>
       <span data-testid="email">{user?.email ?? 'none'}</span>
+      <span data-testid="unit-system">{unitSystem}</span>
     </div>
   );
 }
@@ -48,7 +49,12 @@ function renderAuthProvider(initialEntries = ['/login']) {
 
 describe('AuthProvider', () => {
   it('sets isLoading then isAuthenticated when /users/me succeeds', async () => {
-    server.use(http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(mockUser)));
+    server.use(
+      http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(mockUser)),
+      http.get(`${API_BASE_URL}/users/me/preferences`, () =>
+        HttpResponse.json({ unit_system: 'imperial' }),
+      ),
+    );
 
     renderAuthProvider(['/']);
 
@@ -59,6 +65,28 @@ describe('AuthProvider', () => {
     });
     expect(screen.getByTestId('authenticated')).toHaveTextContent('true');
     expect(screen.getByTestId('email')).toHaveTextContent('user@example.com');
+    await waitFor(() => {
+      expect(screen.getByTestId('unit-system')).toHaveTextContent('imperial');
+    });
+  });
+
+  it('defaults unitSystem to metric when unauthenticated', async () => {
+    server.use(
+      http.get(`${API_BASE_URL}/users/me`, () =>
+        HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 }),
+      ),
+      http.post(`${API_BASE_URL}/auth/refresh`, () =>
+        HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 }),
+      ),
+    );
+
+    renderAuthProvider(['/login']);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('false');
+    });
+    expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
+    expect(screen.getByTestId('unit-system')).toHaveTextContent('metric');
   });
 
   it('treats /users/me failure as unauthenticated', async () => {
@@ -78,6 +106,7 @@ describe('AuthProvider', () => {
     });
     expect(screen.getByTestId('authenticated')).toHaveTextContent('false');
     expect(screen.getByTestId('email')).toHaveTextContent('none');
+    expect(screen.getByTestId('unit-system')).toHaveTextContent('metric');
   });
 
   it('login refetches /users/me and exposes the user', async () => {
@@ -90,6 +119,9 @@ describe('AuthProvider', () => {
         }
         return HttpResponse.json(mockUser);
       }),
+      http.get(`${API_BASE_URL}/users/me/preferences`, () =>
+        HttpResponse.json({ unit_system: 'metric' }),
+      ),
       http.post(`${API_BASE_URL}/auth/refresh`, () =>
         HttpResponse.json({ detail: 'Unauthorized' }, { status: 401 }),
       ),
@@ -135,6 +167,9 @@ describe('AuthProvider', () => {
   it('logout clears session and navigates to /login', async () => {
     server.use(
       http.get(`${API_BASE_URL}/users/me`, () => HttpResponse.json(mockUser)),
+      http.get(`${API_BASE_URL}/users/me/preferences`, () =>
+        HttpResponse.json({ unit_system: 'metric' }),
+      ),
       http.post(`${API_BASE_URL}/auth/logout`, () => new HttpResponse(null, { status: 204 })),
     );
 

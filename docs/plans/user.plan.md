@@ -58,7 +58,7 @@ todos:
         b) Create a separate PreferencesContext.
       Recommendation: extend AuthContext with unitSystem: UnitSystem (default 'metric').
       The formatQuantity(value, unit, unitSystem) utility is then called with the context value.
-    status: pending
+    status: completed
     dependencies:
       - user-hooks
 
@@ -98,7 +98,7 @@ todos:
 | ✅ Done | User API functions |
 | ✅ Done | Query keys |
 | ✅ Done | Custom hooks |
-| ⏳ Pending | Unit system context (extend AuthContext or separate PreferencesContext) |
+| ✅ Done | Unit system context (extend AuthContext or separate PreferencesContext) |
 | ⏳ Pending | ProfilePage (email, password, unit preference, delete) |
 | ⏳ Pending | Tests |
 
