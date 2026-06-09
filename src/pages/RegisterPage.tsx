@@ -3,7 +3,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Alert, Button, TextField } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  PageHarness,
+  PageHarnessFooter,
+  PageHarnessForm,
+  PageHarnessHeader,
+  PageHarnessLink,
+} from '../components/layout/PageHarness';
 import { register as apiRegister } from '../lib/api/auth';
 import { useAuth } from '../context/AuthContext';
 
@@ -60,25 +67,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 p-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Create account</h1>
-        <p className="text-sm text-gray-600">
-          Sign up to start planning your meals.
-        </p>
-      </div>
+    <PageHarness>
+      <PageHarnessHeader
+        title="Create account"
+        description="Sign up to start planning your meals."
+      />
 
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-      >
+      <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
         {submitError ? <Alert severity="error">{submitError}</Alert> : null}
 
         <TextField
           label="Email"
           type="email"
           autoComplete="email"
+          fullWidth
           error={Boolean(errors.email)}
           helperText={errors.email?.message}
           {...register('email')}
@@ -88,6 +90,7 @@ export default function RegisterPage() {
           label="Password"
           type="password"
           autoComplete="new-password"
+          fullWidth
           error={Boolean(errors.password)}
           helperText={errors.password?.message}
           {...register('password')}
@@ -97,22 +100,28 @@ export default function RegisterPage() {
           label="Confirm password"
           type="password"
           autoComplete="new-password"
+          fullWidth
           error={Boolean(errors.confirmPassword)}
           helperText={errors.confirmPassword?.message}
           {...register('confirmPassword')}
         />
 
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          size="large"
+          fullWidth
+          disabled={isSubmitting}
+        >
           Create account
         </Button>
-      </form>
+      </PageHarnessForm>
 
-      <p className="text-center text-sm text-gray-600">
+      <PageHarnessFooter>
         Already have an account?{' '}
-        <Link to="/login" className="font-medium text-blue-600 hover:underline">
-          Sign in
-        </Link>
-      </p>
-    </main>
+        <PageHarnessLink to="/login">Sign in</PageHarnessLink>
+      </PageHarnessFooter>
+    </PageHarness>
   );
 }
