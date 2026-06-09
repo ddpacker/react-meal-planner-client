@@ -14,7 +14,7 @@ todos:
         UserPreferencesRead (unit_system: 'metric' | 'imperial')
         UserPreferencesUpdate (unit_system: 'metric' | 'imperial')
         UnitSystem = 'metric' | 'imperial'
-    status: pending
+    status: completed
 
   - id: user-api
     content: >
@@ -24,7 +24,7 @@ todos:
         deleteMe(password: string) -> void
         fetchPreferences() -> UserPreferencesRead
         updatePreferences(body: UserPreferencesUpdate) -> UserPreferencesRead
-    status: pending
+    status: completed
     dependencies:
       - user-types
 
@@ -34,7 +34,7 @@ todos:
         me(), preferences()
       Note: /users/me is already queried in AuthContext. Reuse the same query key so the
       profile page reads from the cache rather than issuing a duplicate request.
-    status: pending
+    status: completed
     dependencies:
       - user-api
 
@@ -94,9 +94,9 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | TypeScript types (UserRead, UserUpdate, UserPreferences) |
-| ⏳ Pending | User API functions |
-| ⏳ Pending | Query keys |
+| ✅ Done | TypeScript types (UserRead, UserUpdate, UserPreferences) |
+| ✅ Done | User API functions |
+| ✅ Done | Query keys |
 | ⏳ Pending | Custom hooks |
 | ⏳ Pending | Unit system context (extend AuthContext or separate PreferencesContext) |
 | ⏳ Pending | ProfilePage (email, password, unit preference, delete) |
