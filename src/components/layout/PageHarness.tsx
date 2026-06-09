@@ -45,6 +45,24 @@ export function PageHarnessHeader({ title, description }: PageHarnessHeaderProps
   );
 }
 
+type PageHarnessSectionProps = {
+  title: string;
+  description?: string;
+  children: ReactNode;
+};
+
+export function PageHarnessSection({ title, description, children }: PageHarnessSectionProps) {
+  return (
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
+        {description ? <p className="text-sm text-secondary">{description}</p> : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 type PageHarnessFormProps = {
   children: ReactNode;
   onSubmit: FormEventHandler<HTMLFormElement>;

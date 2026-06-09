@@ -46,7 +46,13 @@ export function DeleteAccountSection() {
 
   return (
     <>
-      <Button variant="outlined" color="error" onClick={() => setDialogOpen(true)}>
+      <Button
+        variant="outlined"
+        color="error"
+        size="large"
+        fullWidth
+        onClick={() => setDialogOpen(true)}
+      >
         Delete account
       </Button>
 

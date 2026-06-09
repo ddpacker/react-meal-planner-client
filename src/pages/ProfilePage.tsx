@@ -3,6 +3,13 @@ import { ChangeEmailForm } from '../components/profile/ChangeEmailForm';
 import { ChangePasswordForm } from '../components/profile/ChangePasswordForm';
 import { DeleteAccountSection } from '../components/profile/DeleteAccountSection';
 import { UnitSystemPreference } from '../components/profile/UnitSystemPreference';
+import {
+  PageHarness,
+  PageHarnessFooter,
+  PageHarnessHeader,
+  PageHarnessLink,
+  PageHarnessSection,
+} from '../components/layout/PageHarness';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProfilePage() {
@@ -13,52 +20,46 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="mx-auto flex max-w-2xl flex-col gap-8 p-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold text-primary">Profile</h1>
-        <p className="text-sm text-secondary">Manage your account and preferences.</p>
-      </header>
+    <PageHarness maxWidth="lg">
+      <PageHarnessHeader
+        title="Profile"
+        description="Manage your account and preferences."
+      />
 
-      <section className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-primary">Account</h2>
-          <p className="text-sm text-secondary">
-            Signed in as <span className="font-medium text-primary">{user.email}</span>
-          </p>
-        </div>
+      <PageHarnessSection title="Account">
+        <p className="text-sm text-secondary">
+          Signed in as <span className="font-medium text-primary">{user.email}</span>
+        </p>
         <ChangeEmailForm currentEmail={user.email} />
-      </section>
+      </PageHarnessSection>
 
       <Divider />
 
-      <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-primary">Password</h2>
+      <PageHarnessSection title="Password">
         <ChangePasswordForm />
-      </section>
+      </PageHarnessSection>
 
       <Divider />
 
-      <section className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-primary">Preferences</h2>
-          <p className="text-sm text-secondary">
-            Choose how quantities are displayed throughout the app.
-          </p>
-        </div>
+      <PageHarnessSection
+        title="Preferences"
+        description="Choose how quantities are displayed throughout the app."
+      >
         <UnitSystemPreference />
-      </section>
+      </PageHarnessSection>
 
       <Divider />
 
-      <section className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-primary">Danger zone</h2>
-          <p className="text-sm text-secondary">
-            Permanently delete your account and all associated data.
-          </p>
-        </div>
+      <PageHarnessSection
+        title="Danger zone"
+        description="Permanently delete your account and all associated data."
+      >
         <DeleteAccountSection />
-      </section>
-    </main>
+      </PageHarnessSection>
+
+      <PageHarnessFooter>
+        <PageHarnessLink to="/">Back to meal plans</PageHarnessLink>
+      </PageHarnessFooter>
+    </PageHarness>
   );
 }

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Alert, Button, TextField } from '@mui/material';
+import { PageHarnessForm } from '../layout/PageHarness';
 import { useUpdateMe } from '../../hooks/useUser';
 import { getResponseStatus } from '../../lib/getResponseStatus';
 
@@ -55,7 +56,7 @@ export function ChangeEmailForm({ currentEmail }: ChangeEmailFormProps) {
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
       {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
       {submitError ? <Alert severity="error">{submitError}</Alert> : null}
 
@@ -83,10 +84,12 @@ export function ChangeEmailForm({ currentEmail }: ChangeEmailFormProps) {
         type="submit"
         variant="contained"
         color="primary"
+        size="large"
+        fullWidth
         disabled={isSubmitting || updateMe.isPending}
       >
         Update email
       </Button>
-    </form>
+    </PageHarnessForm>
   );
 }
