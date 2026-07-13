@@ -79,7 +79,7 @@ todos:
           (default: one entree slot per meal)
       Uses React Hook Form + Zod. On submit, calls useCreateMealPlan(); on success, navigates
       to the new plan's detail page.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-hooks
 
@@ -129,7 +129,7 @@ todos:
 | ✅ Done | Custom hooks |
 | ✅ Done | MealPlansPage (list + new plan button) |
 | ✅ Done | MealPlanCard component |
-| ⏳ Pending | CreateMealPlanDialog |
+| ✅ Done | CreateMealPlanDialog |
 | ⏳ Pending | MealPlanDetailPage (weekly grid + generate button) |
 | ⏳ Pending | PlannedMealSlot component |
 | ⏳ Pending | Tests |

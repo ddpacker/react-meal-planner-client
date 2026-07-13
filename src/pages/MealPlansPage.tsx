@@ -1,12 +1,6 @@
 import { useState } from 'react';
-import {
-  Alert,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@mui/material';
+import { Alert, Button, CircularProgress } from '@mui/material';
+import { CreateMealPlanDialog } from '../components/CreateMealPlanDialog';
 import { MealPlanCard } from '../components/MealPlanCard';
 import { useMealPlans } from '../hooks/useMealPlans';
 
@@ -63,17 +57,10 @@ export default function MealPlansPage() {
         </ul>
       ) : null}
 
-      <Dialog
+      <CreateMealPlanDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>New meal plan</DialogTitle>
-        <DialogContent>
-          <p className="text-sm text-secondary">Create form coming soon.</p>
-        </DialogContent>
-      </Dialog>
+      />
     </main>
   );
 }
