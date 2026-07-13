@@ -14,7 +14,7 @@ todos:
         MealPlanWeekRead, MealPlanWeekCreate, MealPlanWeekUpdate
       Include summary fields meal_count and has_grocery_list on MealPlanWeekRead (pending
       backend support — treat as optional for now).
-    status: pending
+    status: completed
 
   - id: meal-plan-api
     content: >
@@ -123,7 +123,7 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | TypeScript types (MealPlanWeek, PlannedMeal, PlannedMealCourse) |
+| ✅ Done | TypeScript types (MealPlanWeek, PlannedMeal, PlannedMealCourse) |
 | ⏳ Pending | Meal plan API functions |
 | ⏳ Pending | Query keys |
 | ⏳ Pending | Custom hooks |
