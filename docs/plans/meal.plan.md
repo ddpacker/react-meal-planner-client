@@ -91,7 +91,7 @@ todos:
       "Generate recipes" button that calls useGenerateRecipes(). Disable the button and show
       a loading spinner while generation is in progress (mutation isPending).
       Link to the grocery list if one exists for this plan.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-hooks
 
@@ -130,7 +130,7 @@ todos:
 | ✅ Done | MealPlansPage (list + new plan button) |
 | ✅ Done | MealPlanCard component |
 | ✅ Done | CreateMealPlanDialog |
-| ⏳ Pending | MealPlanDetailPage (weekly grid + generate button) |
+| ✅ Done | MealPlanDetailPage (weekly grid + generate button) |
 | ⏳ Pending | PlannedMealSlot component |
 | ⏳ Pending | Tests |
 
