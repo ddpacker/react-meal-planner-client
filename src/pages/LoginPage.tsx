@@ -5,12 +5,12 @@ import { z } from 'zod';
 import { Alert, Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {
-  PageHarness,
-  PageHarnessFooter,
-  PageHarnessForm,
-  PageHarnessHeader,
-  PageHarnessLink,
-} from '../components/layout/PageHarness';
+  PageTemplate,
+  PageTemplateFooter,
+  PageTemplateForm,
+  PageTemplateHeader,
+  PageTemplateLink,
+} from '../components/layout/PageTemplate';
 import { useAuth } from '../context/AuthContext';
 
 const loginSchema = z.object({
@@ -67,13 +67,13 @@ export default function LoginPage() {
   };
 
   return (
-    <PageHarness>
-      <PageHarnessHeader
+    <PageTemplate>
+      <PageTemplateHeader
         title="Sign in"
         description="Welcome back. Sign in to plan your meals."
       />
 
-      <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
+      <PageTemplateForm onSubmit={handleSubmit(onSubmit)}>
         {credentialsError ? (
           <Alert severity="error">{credentialsError}</Alert>
         ) : null}
@@ -108,7 +108,7 @@ export default function LoginPage() {
         >
           Sign in
         </Button>
-      </PageHarnessForm>
+      </PageTemplateForm>
 
       <Button
         variant="outlined"
@@ -120,10 +120,10 @@ export default function LoginPage() {
         Sign in with Google
       </Button>
 
-      <PageHarnessFooter>
+      <PageTemplateFooter>
         Don&apos;t have an account?{' '}
-        <PageHarnessLink to="/register">Create one</PageHarnessLink>
-      </PageHarnessFooter>
-    </PageHarness>
+        <PageTemplateLink to="/register">Create one</PageTemplateLink>
+      </PageTemplateFooter>
+    </PageTemplate>
   );
 }

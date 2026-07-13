@@ -8,15 +8,15 @@ const maxWidthClasses = {
   lg: 'max-w-lg',
 } as const;
 
-type PageHarnessMaxWidth = keyof typeof maxWidthClasses;
+type PageTemplateMaxWidth = keyof typeof maxWidthClasses;
 
-type PageHarnessProps = {
+type PageTemplateProps = {
   children: ReactNode;
-  maxWidth?: PageHarnessMaxWidth;
+  maxWidth?: PageTemplateMaxWidth;
 };
 
 /** Full-viewport shell with a centered theme card — use as the root wrapper for auth and similar pages. */
-export function PageHarness({ children, maxWidth = 'md' }: PageHarnessProps) {
+export function PageTemplate({ children, maxWidth = 'md' }: PageTemplateProps) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-6">
       <Paper
@@ -29,12 +29,12 @@ export function PageHarness({ children, maxWidth = 'md' }: PageHarnessProps) {
   );
 }
 
-type PageHarnessHeaderProps = {
+type PageTemplateHeaderProps = {
   title: string;
   description?: string;
 };
 
-export function PageHarnessHeader({ title, description }: PageHarnessHeaderProps) {
+export function PageTemplateHeader({ title, description }: PageTemplateHeaderProps) {
   return (
     <header className="flex flex-col gap-2 text-left">
       <h1 className="text-2xl font-semibold text-primary">{title}</h1>
@@ -45,13 +45,13 @@ export function PageHarnessHeader({ title, description }: PageHarnessHeaderProps
   );
 }
 
-type PageHarnessSectionProps = {
+type PageTemplateSectionProps = {
   title: string;
   description?: string;
   children: ReactNode;
 };
 
-export function PageHarnessSection({ title, description, children }: PageHarnessSectionProps) {
+export function PageTemplateSection({ title, description, children }: PageTemplateSectionProps) {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -63,12 +63,12 @@ export function PageHarnessSection({ title, description, children }: PageHarness
   );
 }
 
-type PageHarnessFormProps = {
+type PageTemplateFormProps = {
   children: ReactNode;
   onSubmit: FormEventHandler<HTMLFormElement>;
 };
 
-export function PageHarnessForm({ children, onSubmit }: PageHarnessFormProps) {
+export function PageTemplateForm({ children, onSubmit }: PageTemplateFormProps) {
   return (
     <form className="flex flex-col gap-5" onSubmit={onSubmit} noValidate>
       {children}
@@ -76,15 +76,15 @@ export function PageHarnessForm({ children, onSubmit }: PageHarnessFormProps) {
   );
 }
 
-type PageHarnessFooterProps = {
+type PageTemplateFooterProps = {
   children: ReactNode;
 };
 
-export function PageHarnessFooter({ children }: PageHarnessFooterProps) {
+export function PageTemplateFooter({ children }: PageTemplateFooterProps) {
   return <p className="text-center text-sm text-secondary">{children}</p>;
 }
 
-export function PageHarnessLink({ className, ...props }: LinkProps) {
+export function PageTemplateLink({ className, ...props }: LinkProps) {
   const linkClassName = [
     'font-medium text-primary underline-offset-2 hover:underline',
     className,

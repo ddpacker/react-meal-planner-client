@@ -5,12 +5,12 @@ import { z } from 'zod';
 import { Alert, Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {
-  PageHarness,
-  PageHarnessFooter,
-  PageHarnessForm,
-  PageHarnessHeader,
-  PageHarnessLink,
-} from '../components/layout/PageHarness';
+  PageTemplate,
+  PageTemplateFooter,
+  PageTemplateForm,
+  PageTemplateHeader,
+  PageTemplateLink,
+} from '../components/layout/PageTemplate';
 import { register as apiRegister } from '../lib/api/auth';
 import { useAuth } from '../context/AuthContext';
 
@@ -67,13 +67,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <PageHarness>
-      <PageHarnessHeader
+    <PageTemplate>
+      <PageTemplateHeader
         title="Create account"
         description="Sign up to start planning your meals."
       />
 
-      <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
+      <PageTemplateForm onSubmit={handleSubmit(onSubmit)}>
         {submitError ? <Alert severity="error">{submitError}</Alert> : null}
 
         <TextField
@@ -116,12 +116,12 @@ export default function RegisterPage() {
         >
           Create account
         </Button>
-      </PageHarnessForm>
+      </PageTemplateForm>
 
-      <PageHarnessFooter>
+      <PageTemplateFooter>
         Already have an account?{' '}
-        <PageHarnessLink to="/login">Sign in</PageHarnessLink>
-      </PageHarnessFooter>
-    </PageHarness>
+        <PageTemplateLink to="/login">Sign in</PageTemplateLink>
+      </PageTemplateFooter>
+    </PageTemplate>
   );
 }

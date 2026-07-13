@@ -4,12 +4,12 @@ import { ChangePasswordForm } from '../components/profile/ChangePasswordForm';
 import { DeleteAccountSection } from '../components/profile/DeleteAccountSection';
 import { UnitSystemPreference } from '../components/profile/UnitSystemPreference';
 import {
-  PageHarness,
-  PageHarnessFooter,
-  PageHarnessHeader,
-  PageHarnessLink,
-  PageHarnessSection,
-} from '../components/layout/PageHarness';
+  PageTemplate,
+  PageTemplateFooter,
+  PageTemplateHeader,
+  PageTemplateLink,
+  PageTemplateSection,
+} from '../components/layout/PageTemplate';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProfilePage() {
@@ -20,46 +20,46 @@ export default function ProfilePage() {
   }
 
   return (
-    <PageHarness maxWidth="lg">
-      <PageHarnessHeader
+    <PageTemplate maxWidth="lg">
+      <PageTemplateHeader
         title="Profile"
         description="Manage your account and preferences."
       />
 
-      <PageHarnessSection title="Account">
+      <PageTemplateSection title="Account">
         <p className="text-sm text-secondary">
           Signed in as <span className="font-medium text-primary">{user.email}</span>
         </p>
         <ChangeEmailForm currentEmail={user.email} />
-      </PageHarnessSection>
+      </PageTemplateSection>
 
       <Divider />
 
-      <PageHarnessSection title="Password">
+      <PageTemplateSection title="Password">
         <ChangePasswordForm />
-      </PageHarnessSection>
+      </PageTemplateSection>
 
       <Divider />
 
-      <PageHarnessSection
+      <PageTemplateSection
         title="Preferences"
         description="Choose how quantities are displayed throughout the app."
       >
         <UnitSystemPreference />
-      </PageHarnessSection>
+      </PageTemplateSection>
 
       <Divider />
 
-      <PageHarnessSection
+      <PageTemplateSection
         title="Danger zone"
         description="Permanently delete your account and all associated data."
       >
         <DeleteAccountSection />
-      </PageHarnessSection>
+      </PageTemplateSection>
 
-      <PageHarnessFooter>
-        <PageHarnessLink to="/">Back to meal plans</PageHarnessLink>
-      </PageHarnessFooter>
-    </PageHarness>
+      <PageTemplateFooter>
+        <PageTemplateLink to="/">Back to meal plans</PageTemplateLink>
+      </PageTemplateFooter>
+    </PageTemplate>
   );
 }
