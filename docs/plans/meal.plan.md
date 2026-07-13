@@ -57,7 +57,7 @@ todos:
       Create src/pages/MealPlansPage.tsx. Displays a list of MealPlanWeekRead cards using
       useMealPlans(). Each card shows the plan title, date range, and a meal count badge.
       Includes a "New plan" button that opens a create dialog. Empty state when no plans exist.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-hooks
 
@@ -127,7 +127,7 @@ todos:
 | ✅ Done | Meal plan API functions |
 | ✅ Done | Query keys |
 | ✅ Done | Custom hooks |
-| ⏳ Pending | MealPlansPage (list + new plan button) |
+| ✅ Done | MealPlansPage (list + new plan button) |
 | ⏳ Pending | MealPlanCard component |
 | ⏳ Pending | CreateMealPlanDialog |
 | ⏳ Pending | MealPlanDetailPage (weekly grid + generate button) |
