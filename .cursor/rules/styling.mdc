@@ -1,5 +1,5 @@
 ---
-description: Tailwind CSS v4 + MUI v9 styling conventions — theme tokens, PageHarness layout, and when to use each. Active when editing components/, pages/, or lib/theme/.
+description: Tailwind CSS v4 + MUI v9 styling conventions — theme tokens, PageTemplate layout, and when to use each. Active when editing components/, pages/, or lib/theme/.
 globs: src/components/**/*.tsx,src/pages/**/*.tsx,src/lib/theme/**/*
 alwaysApply: false
 ---
@@ -55,60 +55,60 @@ All new pages and components must use the shared theme — never introduce ad-ho
 
 Do not hardcode hex values in pages or components. Do not use generic Tailwind palette classes (`text-slate-700`, `bg-blue-600`, etc.) when a semantic token exists.
 
-## PageHarness (required for standalone card pages)
+## PageTemplate (required for standalone card pages)
 
-For centered, card-based pages (auth, onboarding, password reset, and similar standalone flows), use **`PageHarness`** from `src/components/layout/PageHarness.tsx`. Do not hand-roll `<main>` + `Paper` layouts.
+For centered, card-based pages (auth, onboarding, password reset, and similar standalone flows), use **`PageTemplate`** from `src/components/layout/PageTemplate.tsx`. Do not hand-roll `<main>` + `Paper` layouts.
 
 **Canonical examples:** `LoginPage`, `RegisterPage`
 
 | Component | Purpose |
 |-----------|---------|
-| `PageHarness` | Root wrapper — full-viewport background + centered card (`maxWidth`: `sm` \| `md` \| `lg`) |
-| `PageHarnessHeader` | Title + optional description |
-| `PageHarnessForm` | Form with standard field spacing (`gap-5`) |
-| `PageHarnessFooter` | Centered footer copy |
-| `PageHarnessLink` | Themed react-router link |
+| `PageTemplate` | Root wrapper — full-viewport background + centered card (`maxWidth`: `sm` \| `md` \| `lg`) |
+| `PageTemplateHeader` | Title + optional description |
+| `PageTemplateForm` | Form with standard field spacing (`gap-5`) |
+| `PageTemplateFooter` | Centered footer copy |
+| `PageTemplateLink` | Themed react-router link |
 
 ```tsx
 // Correct — new standalone card page
 import {
-  PageHarness,
-  PageHarnessFooter,
-  PageHarnessForm,
-  PageHarnessHeader,
-  PageHarnessLink,
-} from '../components/layout/PageHarness';
+  PageTemplate,
+  PageTemplateFooter,
+  PageTemplateForm,
+  PageTemplateHeader,
+  PageTemplateLink,
+} from '../components/layout/PageTemplate';
 
 export default function ResetPasswordPage() {
   return (
-    <PageHarness>
-      <PageHarnessHeader title="Reset password" description="We'll email you a link." />
-      <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
+    <PageTemplate>
+      <PageTemplateHeader title="Reset password" description="We'll email you a link." />
+      <PageTemplateForm onSubmit={handleSubmit(onSubmit)}>
         <TextField label="Email" fullWidth />
         <Button type="submit" variant="contained" color="primary" size="large" fullWidth>
           Send link
         </Button>
-      </PageHarnessForm>
-      <PageHarnessFooter>
-        <PageHarnessLink to="/login">Back to sign in</PageHarnessLink>
-      </PageHarnessFooter>
-    </PageHarness>
+      </PageTemplateForm>
+      <PageTemplateFooter>
+        <PageTemplateLink to="/login">Back to sign in</PageTemplateLink>
+      </PageTemplateFooter>
+    </PageTemplate>
   );
 }
 
-// Wrong — bespoke layout duplicating the harness
+// Wrong — bespoke layout duplicating the Template
 <main className="flex min-h-screen items-center justify-center bg-[#FAF3DD]">
   <Paper className="p-8">...</Paper>
 </main>
 ```
 
-**Inside the harness:**
+**Inside the Template:**
 
 - Use MUI `TextField` / `Button` with `fullWidth`, `size="large"`, and `color="primary"` or `color="secondary"`
-- Place optional secondary actions (e.g. OAuth buttons) as siblings between `PageHarnessForm` and `PageHarnessFooter`
-- Do not re-style the card, header, or footer — extend the harness components if the design system needs new slots
+- Place optional secondary actions (e.g. OAuth buttons) as siblings between `PageTemplateForm` and `PageTemplateFooter`
+- Do not re-style the card, header, or footer — extend the Template components if the design system needs new slots
 
-**Authenticated app pages** (lists, detail views, dashboards) do not use `PageHarness`. They still must use theme tokens for all colour and typography. When an app-level shell exists (`AppShell` or similar), use that instead of inventing a new page wrapper.
+**Authenticated app pages** (lists, detail views, dashboards) do not use `PageTemplate`. They still must use theme tokens for all colour and typography. When an app-level shell exists (`AppShell` or similar), use that instead of inventing a new page wrapper.
 
 ## Tailwind
 
@@ -133,7 +133,7 @@ export default function ResetPasswordPage() {
 - Import MUI components from `@mui/material`.
 - Use the `size` and `variant` props instead of overriding dimensions manually.
 - For minor visual tweaks on MUI components, prefer the `sx` prop with theme tokens over adding a Tailwind class on the MUI component root.
-- Do not wrap a MUI `Button` in a `<div>` just to add spacing — use Tailwind on the surrounding container or harness slots.
+- Do not wrap a MUI `Button` in a `<div>` just to add spacing — use Tailwind on the surrounding container or Template slots.
 
 ```tsx
 // Correct
@@ -168,7 +168,7 @@ export default function ResetPasswordPage() {
 ## Do not
 
 - Do not hardcode hex colours or use generic Tailwind palette classes where semantic tokens exist.
-- Do not build standalone card pages without `PageHarness` — extend the harness if a new slot is needed.
+- Do not build standalone card pages without `PageTemplate` — extend the Template if a new slot is needed.
 - Do not add colours outside `src/lib/theme/tokens.ts`.
 - Do not use the `style` prop for anything Tailwind or MUI can handle.
 - Do not import `@emotion/react` or `@emotion/styled` directly — MUI manages Emotion internally.

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Alert, Button, TextField } from '@mui/material';
-import { PageHarnessForm } from '../layout/PageHarness';
+import { PageTemplateForm } from '../layout/PageTemplate';
 import { useUpdateMe } from '../../hooks/useUser';
 import { getResponseStatus } from '../../lib/getResponseStatus';
 
@@ -59,7 +59,7 @@ export function ChangePasswordForm() {
   };
 
   return (
-    <PageHarnessForm onSubmit={handleSubmit(onSubmit)}>
+    <PageTemplateForm onSubmit={handleSubmit(onSubmit)}>
       {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
       {submitError ? <Alert severity="error">{submitError}</Alert> : null}
 
@@ -103,6 +103,6 @@ export function ChangePasswordForm() {
       >
         Update password
       </Button>
-    </PageHarnessForm>
+    </PageTemplateForm>
   );
 }
