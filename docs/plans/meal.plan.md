@@ -113,7 +113,7 @@ todos:
         - CreateMealPlanDialog: form validation, submit calls mutation, navigates on success
         - useGenerateRecipes: invalidates recipe keys on success (test via MSW)
       Use renderWithProviders; MSW handlers for /meal-plans GET/POST and /generate-recipes POST.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-detail-page
       - create-meal-plan-dialog
@@ -132,7 +132,7 @@ todos:
 | ✅ Done | CreateMealPlanDialog |
 | ✅ Done | MealPlanDetailPage (weekly grid + generate button) |
 | ✅ Done | PlannedMealSlot component |
-| ⏳ Pending | Tests |
+| ✅ Done | Tests |
 
 ---
 
