@@ -34,7 +34,7 @@ todos:
     content: >
       Add mealPlanKeys to src/lib/queryKeys.ts:
         all, lists(), detail(id), meals(planId), meal(planId, mealId)
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-api
 
@@ -125,7 +125,7 @@ todos:
 |--------|------|
 | ✅ Done | TypeScript types (MealPlanWeek, PlannedMeal, PlannedMealCourse) |
 | ✅ Done | Meal plan API functions |
-| ⏳ Pending | Query keys |
+| ✅ Done | Query keys |
 | ⏳ Pending | Custom hooks |
 | ⏳ Pending | MealPlansPage (list + new plan button) |
 | ⏳ Pending | MealPlanCard component |
