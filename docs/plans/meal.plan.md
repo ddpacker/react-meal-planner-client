@@ -48,7 +48,7 @@ todos:
         useDeleteMealPlan() — useMutation; onSuccess: invalidate lists()
         useUpdatePlannedMeal() — useMutation; onSuccess: invalidate detail(planId)
         useGenerateRecipes() — useMutation; onSuccess: invalidate detail(planId) + recipe keys
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-query-keys
 
@@ -126,7 +126,7 @@ todos:
 | ✅ Done | TypeScript types (MealPlanWeek, PlannedMeal, PlannedMealCourse) |
 | ✅ Done | Meal plan API functions |
 | ✅ Done | Query keys |
-| ⏳ Pending | Custom hooks |
+| ✅ Done | Custom hooks |
 | ⏳ Pending | MealPlansPage (list + new plan button) |
 | ⏳ Pending | MealPlanCard component |
 | ⏳ Pending | CreateMealPlanDialog |
