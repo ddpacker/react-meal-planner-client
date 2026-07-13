@@ -2,29 +2,13 @@ import { useState } from 'react';
 import {
   Alert,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { MealPlanCard } from '../components/MealPlanCard';
 import { useMealPlans } from '../hooks/useMealPlans';
-import type { MealPlanWeekRead } from '../types/mealPlan';
-
-function formatDateRange(startDate: string, endDate: string): string {
-  return `${startDate} to ${endDate}`;
-}
-
-function mealCountForPlan(plan: MealPlanWeekRead): number | null {
-  if (typeof plan.meal_count === 'number') {
-    return plan.meal_count;
-  }
-  if (plan.planned_meals.length > 0) {
-    return plan.planned_meals.length;
-  }
-  return null;
-}
 
 export default function MealPlansPage() {
   const { data: plans, isLoading, isError } = useMealPlans();
@@ -73,41 +57,9 @@ export default function MealPlansPage() {
 
       {!isLoading && !isError && plans && plans.length > 0 ? (
         <ul className="flex flex-col gap-4">
-          {plans.map((plan) => {
-            const mealCount = mealCountForPlan(plan);
-            return (
-              <li
-                key={plan.id}
-                className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4"
-              >
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-lg font-medium text-primary">
-                    {plan.title ?? 'Untitled plan'}
-                  </h2>
-                  <p className="text-sm text-secondary">
-                    {formatDateRange(plan.start_date, plan.end_date)}
-                  </p>
-                  {mealCount !== null ? (
-                    <Chip
-                      size="small"
-                      label={`${mealCount} meal${mealCount === 1 ? '' : 's'}`}
-                      color="secondary"
-                      variant="outlined"
-                      className="mt-1 w-fit"
-                    />
-                  ) : null}
-                </div>
-                <Button
-                  component={RouterLink}
-                  to={`/meal-plans/${plan.id}`}
-                  variant="outlined"
-                  color="primary"
-                >
-                  Open
-                </Button>
-              </li>
-            );
-          })}
+          {plans.map((plan) => (
+            <MealPlanCard key={plan.id} plan={plan} />
+          ))}
         </ul>
       ) : null}
 

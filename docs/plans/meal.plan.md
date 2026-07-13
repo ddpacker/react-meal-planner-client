@@ -66,7 +66,7 @@ todos:
       Create src/components/MealPlanCard.tsx. Displays a single MealPlanWeekRead summary:
       title, start_date to end_date, meal_count, and a button to navigate to the detail page.
       Include a delete action with a confirmation dialog.
-    status: pending
+    status: completed
     dependencies:
       - meal-plans-page
 
@@ -128,7 +128,7 @@ todos:
 | ✅ Done | Query keys |
 | ✅ Done | Custom hooks |
 | ✅ Done | MealPlansPage (list + new plan button) |
-| ⏳ Pending | MealPlanCard component |
+| ✅ Done | MealPlanCard component |
 | ⏳ Pending | CreateMealPlanDialog |
 | ⏳ Pending | MealPlanDetailPage (weekly grid + generate button) |
 | ⏳ Pending | PlannedMealSlot component |
