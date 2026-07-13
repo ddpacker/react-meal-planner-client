@@ -26,7 +26,7 @@ todos:
         deleteMealPlan(id) -> void
         updatePlannedMeal(planId, mealId, body) -> PlannedMealRead
         generateRecipes(planId) -> MealPlanWeekRead
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-types
 
@@ -124,7 +124,7 @@ todos:
 | Status | Task |
 |--------|------|
 | ✅ Done | TypeScript types (MealPlanWeek, PlannedMeal, PlannedMealCourse) |
-| ⏳ Pending | Meal plan API functions |
+| ✅ Done | Meal plan API functions |
 | ⏳ Pending | Query keys |
 | ⏳ Pending | Custom hooks |
 | ⏳ Pending | MealPlansPage (list + new plan button) |
