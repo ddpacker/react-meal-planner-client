@@ -1,16 +1,10 @@
-import { Alert, Button, Chip, CircularProgress } from '@mui/material';
+import { Alert, Button, CircularProgress } from '@mui/material';
 import { Link as RouterLink, useParams } from 'react-router-dom';
+import { PlannedMealSlot } from '../components/PlannedMealSlot';
 import { useGenerateRecipes, useMealPlan } from '../hooks/useMealPlans';
-import type { MealCourseRole, PlannedMealRead } from '../types/mealPlan';
+import type { PlannedMealRead } from '../types/mealPlan';
 
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
-
-const COURSE_ROLE_LABELS: Record<MealCourseRole, string> = {
-  starter: 'Starter',
-  entree: 'Main',
-  side: 'Side',
-  dessert: 'Dessert',
-};
 
 function mealsByDayIndex(meals: PlannedMealRead[]): Array<PlannedMealRead | null> {
   const slots: Array<PlannedMealRead | null> = Array.from({ length: 7 }, () => null);
@@ -120,44 +114,12 @@ export default function MealPlanDetailPage() {
       <section aria-label="Weekly meals">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
           {daySlots.map((meal, dayIndex) => (
-            <article
+            <PlannedMealSlot
               key={DAY_LABELS[dayIndex]}
-              className="flex flex-col gap-2 border-t border-border pt-3"
-            >
-              <h2 className="text-sm font-medium text-secondary">{DAY_LABELS[dayIndex]}</h2>
-              {meal ? (
-                <>
-                  <h3 className="text-base font-medium text-primary">{meal.meal_name}</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {meal.courses.map((course) => (
-                      <Chip
-                        key={course.id}
-                        size="small"
-                        label={COURSE_ROLE_LABELS[course.role]}
-                        color="secondary"
-                        variant="outlined"
-                      />
-                    ))}
-                  </div>
-                  {meal.recipes && meal.recipes.length > 0 ? (
-                    <ul className="flex flex-col gap-1">
-                      {meal.recipes.map((recipe) => (
-                        <li key={recipe.id}>
-                          <RouterLink
-                            to={`/recipes/${recipe.recipe_id}`}
-                            className="text-sm text-primary underline-offset-2 hover:underline"
-                          >
-                            {recipe.recipe_title ?? `Recipe ${recipe.recipe_id}`}
-                          </RouterLink>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </>
-              ) : (
-                <p className="text-sm text-secondary">No meal planned</p>
-              )}
-            </article>
+              planId={plan.id}
+              meal={meal}
+              dayLabel={DAY_LABELS[dayIndex]}
+            />
           ))}
         </div>
       </section>

@@ -101,7 +101,7 @@ todos:
       grid: meal name, list of PlannedMealCourse rows (role + optional description), and linked
       recipe title links. Clicking the meal name opens an inline edit for the name and status.
       Clicking a recipe title navigates to /recipes/:id.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-detail-page
 
@@ -131,7 +131,7 @@ todos:
 | ✅ Done | MealPlanCard component |
 | ✅ Done | CreateMealPlanDialog |
 | ✅ Done | MealPlanDetailPage (weekly grid + generate button) |
-| ⏳ Pending | PlannedMealSlot component |
+| ✅ Done | PlannedMealSlot component |
 | ⏳ Pending | Tests |
 
 ---
