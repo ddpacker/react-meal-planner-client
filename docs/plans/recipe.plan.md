@@ -48,7 +48,7 @@ todos:
         useCreateRecipe() — useMutation; onSuccess: invalidate lists()
         useUpdateRecipe() — useMutation; onSuccess: invalidate detail(id) + lists()
         useDeleteRecipe() — useMutation; onSuccess: invalidate lists()
-    status: pending
+    status: completed
     dependencies:
       - recipe-query-keys
 
