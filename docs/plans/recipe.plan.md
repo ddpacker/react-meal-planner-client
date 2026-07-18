@@ -67,7 +67,7 @@ todos:
       library using useRecipes(). Includes a search text field (debounced, updates the
       query params), and a "New recipe" button that navigates to a create form or opens a
       dialog. Renders RecipeCard components in a grid. Shows an empty state when no recipes exist.
-    status: pending
+    status: completed
     dependencies:
       - recipe-card
 
