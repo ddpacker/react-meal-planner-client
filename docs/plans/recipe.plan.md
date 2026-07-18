@@ -103,7 +103,7 @@ todos:
         - RecipeForm: add/remove ingredient rows, metric conversion on submit
         - useDeleteRecipe: invalidates lists() on success
       MSW handlers for GET /recipes, GET /recipes/:id, DELETE /recipes/:id.
-    status: pending
+    status: completed
     dependencies:
       - recipe-create-form
 ---
@@ -112,15 +112,15 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | TypeScript types (RecipeRead, RecipeSummaryRead, RecipeCreate) |
-| ⏳ Pending | Recipe API functions |
-| ⏳ Pending | Query keys |
-| ⏳ Pending | Custom hooks |
-| ⏳ Pending | RecipeCard component |
-| ⏳ Pending | RecipesPage (library with search) |
-| ⏳ Pending | RecipeDetailPage (ingredients + chat + nutrition) |
-| ⏳ Pending | RecipeForm (create + edit, dynamic ingredient rows) |
-| ⏳ Pending | Tests |
+| ✅ Done | TypeScript types (RecipeRead, RecipeSummaryRead, RecipeCreate) |
+| ✅ Done | Recipe API functions |
+| ✅ Done | Query keys |
+| ✅ Done | Custom hooks |
+| ✅ Done | RecipeCard component |
+| ✅ Done | RecipesPage (library with search) |
+| ✅ Done | RecipeDetailPage (ingredients + chat + nutrition) |
+| ✅ Done | RecipeForm (create + edit, dynamic ingredient rows) |
+| ✅ Done | Tests |
 
 ---
 

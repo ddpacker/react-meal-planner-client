@@ -22,14 +22,14 @@ import type { RecipeCreate, RecipeRead } from '../types/recipe';
 
 const ingredientSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  quantity: z.coerce.number().positive('Quantity must be positive'),
+  quantity: z.number().positive('Quantity must be positive'),
   unit: z.string().min(1, 'Unit is required'),
   category: z.string().min(1, 'Category is required'),
 });
 
 const recipeFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  servings: z.coerce.number().int().min(1, 'Servings must be at least 1'),
+  servings: z.number().int().min(1, 'Servings must be at least 1'),
   instructions: z.string().min(1, 'Instructions are required'),
   ingredients: z.array(ingredientSchema).min(1, 'Add at least one ingredient'),
 });
@@ -165,10 +165,10 @@ export function RecipeForm({ recipe, onSuccess, onCancel }: RecipeFormProps) {
         label="Servings"
         type="number"
         fullWidth
-        inputProps={{ min: 1, step: 1 }}
+        slotProps={{ htmlInput: { min: 1, step: 1 } }}
         error={Boolean(errors.servings)}
         helperText={errors.servings?.message}
-        {...register('servings')}
+        {...register('servings', { valueAsNumber: true })}
       />
 
       <TextField
@@ -224,10 +224,10 @@ export function RecipeForm({ recipe, onSuccess, onCancel }: RecipeFormProps) {
               type="number"
               fullWidth
               size="small"
-              inputProps={{ min: 0, step: 'any' }}
+              slotProps={{ htmlInput: { min: 0, step: 'any' } }}
               error={Boolean(errors.ingredients?.[index]?.quantity)}
               helperText={errors.ingredients?.[index]?.quantity?.message}
-              {...register(`ingredients.${index}.quantity`)}
+              {...register(`ingredients.${index}.quantity`, { valueAsNumber: true })}
             />
             <Controller
               name={`ingredients.${index}.unit`}
