@@ -1,12 +1,27 @@
 import { useState } from 'react';
 import { Alert, Button, CircularProgress } from '@mui/material';
-import { CreateMealPlanDialog } from '../components/CreateMealPlanDialog';
+import { useNavigate } from 'react-router-dom';
 import { MealPlanCard } from '../components/MealPlanCard';
-import { useMealPlans } from '../hooks/useMealPlans';
+import { useCreateMealPlan, useMealPlans } from '../hooks/useMealPlans';
+import { buildNewWeekPlanBody } from '../lib/mealPlanDays';
 
 export default function MealPlansPage() {
+  const navigate = useNavigate();
   const { data: plans, isLoading, isError } = useMealPlans();
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const createMealPlan = useCreateMealPlan();
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const handleNewPlan = async () => {
+    setCreateError(null);
+    try {
+      const plan = await createMealPlan.mutateAsync(buildNewWeekPlanBody());
+      navigate(`/meal-plans/${plan.id}`);
+    } catch {
+      setCreateError('Could not create a meal plan. Please try again.');
+    }
+  };
+
+  const creating = createMealPlan.isPending;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 bg-background p-6">
@@ -20,11 +35,15 @@ export default function MealPlansPage() {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => setCreateDialogOpen(true)}
+          onClick={handleNewPlan}
+          disabled={creating}
+          startIcon={creating ? <CircularProgress size={16} color="inherit" /> : null}
         >
           New plan
         </Button>
       </header>
+
+      {createError ? <Alert severity="error">{createError}</Alert> : null}
 
       {isLoading ? (
         <div className="flex justify-center py-16">
@@ -42,7 +61,9 @@ export default function MealPlansPage() {
           <Button
             variant="outlined"
             color="primary"
-            onClick={() => setCreateDialogOpen(true)}
+            onClick={handleNewPlan}
+            disabled={creating}
+            startIcon={creating ? <CircularProgress size={16} color="inherit" /> : null}
           >
             New plan
           </Button>
@@ -56,11 +77,6 @@ export default function MealPlansPage() {
           ))}
         </ul>
       ) : null}
-
-      <CreateMealPlanDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-      />
     </main>
   );
 }
