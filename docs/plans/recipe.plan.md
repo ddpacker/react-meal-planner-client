@@ -35,7 +35,7 @@ todos:
     content: >
       Add recipeKeys to src/lib/queryKeys.ts:
         all, lists(), list(params), detail(id), byMeal(mealId), nutrition(recipeId)
-    status: pending
+    status: completed
     dependencies:
       - recipe-api
 

@@ -13,8 +13,13 @@ export const mealPlanKeys = {
     [...mealPlanKeys.meals(planId), mealId] as const,
 };
 
-/** Minimal recipe keys so meal-plan mutations can invalidate the recipe library. */
+/** Recipe library, detail, meal-linked, and nutrition query keys. */
 export const recipeKeys = {
   all: ['recipes'] as const,
   lists: () => [...recipeKeys.all, 'list'] as const,
+  list: (params: object) => [...recipeKeys.lists(), params] as const,
+  detail: (id: number) => [...recipeKeys.all, 'detail', id] as const,
+  byMeal: (mealId: number) => [...recipeKeys.all, 'byMeal', mealId] as const,
+  nutrition: (recipeId: number) =>
+    [...recipeKeys.all, 'nutrition', recipeId] as const,
 };
