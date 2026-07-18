@@ -57,7 +57,7 @@ todos:
       Create src/components/RecipeCard.tsx. Displays a RecipeSummaryRead:
       title, servings, an AI-generated badge (when source_model is not null), and a delete
       button with confirmation. Clicking the card navigates to /recipes/:id.
-    status: pending
+    status: completed
     dependencies:
       - recipe-hooks
 
