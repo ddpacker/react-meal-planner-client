@@ -118,3 +118,63 @@ export function toMetricQuantity(
       return { quantity: value, unit };
   }
 }
+
+/**
+ * Convert a metric API quantity into the user's preferred unit for form defaults.
+ */
+export function fromMetricQuantity(
+  value: number,
+  unit: string,
+  unitSystem: UnitSystem,
+): QuantityUnit {
+  if (unitSystem === 'metric') {
+    return { quantity: value, unit };
+  }
+
+  const normalized = unit.trim().toLowerCase();
+
+  switch (normalized) {
+    case 'g':
+    case 'gram':
+    case 'grams':
+      if (value >= GRAMS_PER_POUND) {
+        return { quantity: value / GRAMS_PER_POUND, unit: 'lb' };
+      }
+      return { quantity: value / GRAMS_PER_OUNCE, unit: 'oz' };
+    case 'kg':
+    case 'kilogram':
+    case 'kilograms':
+      return { quantity: value * (1000 / GRAMS_PER_POUND), unit: 'lb' };
+    case 'ml':
+    case 'millilitre':
+    case 'millilitres':
+    case 'milliliter':
+    case 'milliliters':
+      if (value >= ML_PER_CUP) {
+        return { quantity: value / ML_PER_CUP, unit: 'cup' };
+      }
+      return { quantity: value / ML_PER_FL_OZ, unit: 'fl oz' };
+    case 'l':
+    case 'litre':
+    case 'litres':
+    case 'liter':
+    case 'liters':
+      return { quantity: (value * ML_PER_LITRE) / ML_PER_CUP, unit: 'cup' };
+    default:
+      return { quantity: value, unit };
+  }
+}
+
+export const METRIC_UNITS = ['g', 'kg', 'ml', 'l', 'piece', 'clove', 'pinch'] as const;
+export const IMPERIAL_UNITS = ['oz', 'lb', 'fl oz', 'cup', 'piece', 'clove', 'pinch'] as const;
+
+export const INGREDIENT_CATEGORIES = [
+  'produce',
+  'dairy',
+  'meat',
+  'seafood',
+  'pantry',
+  'spices',
+  'bakery',
+  'other',
+] as const;

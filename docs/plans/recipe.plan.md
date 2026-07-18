@@ -90,7 +90,7 @@ todos:
       (add/remove rows, each with name, quantity, unit, category). Quantities are entered in
       the user's preferred unit but submitted to the API in metric. Reuse for both
       POST /recipes (create) and PUT /recipes/:id (edit).
-    status: pending
+    status: completed
     dependencies:
       - recipe-detail-page
 

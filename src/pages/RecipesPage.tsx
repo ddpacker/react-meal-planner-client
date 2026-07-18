@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, CircularProgress, Dialog, DialogContent, DialogTitle, TextField } from '@mui/material';
+import {
+  Alert,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { RecipeCard } from '../components/RecipeCard';
+import { RecipeForm } from '../components/RecipeForm';
 import { useRecipes } from '../hooks/useRecipes';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -15,6 +25,7 @@ const PAGE_SIZE = 12;
  * local filter.
  */
 export default function RecipesPage() {
+  const navigate = useNavigate();
   const { data: recipes, isLoading, isError } = useRecipes();
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -147,8 +158,13 @@ export default function RecipesPage() {
       >
         <DialogTitle>New recipe</DialogTitle>
         <DialogContent>
-          {/* RecipeForm is wired in the recipe-create-form task. */}
-          <p className="text-sm text-secondary">Recipe form coming soon.</p>
+          <RecipeForm
+            onCancel={() => setCreateOpen(false)}
+            onSuccess={(created) => {
+              setCreateOpen(false);
+              navigate(`/recipes/${created.id}`);
+            }}
+          />
         </DialogContent>
       </Dialog>
     </main>

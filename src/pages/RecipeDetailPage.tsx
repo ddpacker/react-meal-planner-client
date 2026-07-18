@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Link as RouterLink, useParams } from 'react-router-dom';
+import { RecipeForm } from '../components/RecipeForm';
 import { useAuth } from '../context/AuthContext';
 import { useRecipe } from '../hooks/useRecipes';
 import { formatQuantity } from '../lib/formatQuantity';
@@ -126,8 +127,11 @@ export default function RecipeDetailPage() {
       >
         <DialogTitle>Edit recipe</DialogTitle>
         <DialogContent>
-          {/* RecipeForm is wired in the recipe-create-form task. */}
-          <p className="text-sm text-secondary">Recipe form coming soon.</p>
+          <RecipeForm
+            recipe={recipe}
+            onCancel={() => setEditOpen(false)}
+            onSuccess={() => setEditOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </main>
