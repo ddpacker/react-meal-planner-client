@@ -27,7 +27,7 @@ todos:
         deleteRecipe(id) -> void
         fetchNutrition(recipeId) -> NutritionInfoRead
         generateNutrition(recipeId) -> NutritionInfoRead
-    status: pending
+    status: completed
     dependencies:
       - recipe-types
 
