@@ -14,7 +14,7 @@ todos:
         MealPlanWeekRead, MealPlanWeekCreate, MealPlanWeekUpdate
       Include summary fields meal_count and has_grocery_list on MealPlanWeekRead (pending
       backend support — treat as optional for now).
-    status: pending
+    status: completed
 
   - id: meal-plan-api
     content: >
@@ -26,7 +26,7 @@ todos:
         deleteMealPlan(id) -> void
         updatePlannedMeal(planId, mealId, body) -> PlannedMealRead
         generateRecipes(planId) -> MealPlanWeekRead
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-types
 
@@ -34,7 +34,7 @@ todos:
     content: >
       Add mealPlanKeys to src/lib/queryKeys.ts:
         all, lists(), detail(id), meals(planId), meal(planId, mealId)
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-api
 
@@ -48,7 +48,7 @@ todos:
         useDeleteMealPlan() — useMutation; onSuccess: invalidate lists()
         useUpdatePlannedMeal() — useMutation; onSuccess: invalidate detail(planId)
         useGenerateRecipes() — useMutation; onSuccess: invalidate detail(planId) + recipe keys
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-query-keys
 
@@ -57,7 +57,7 @@ todos:
       Create src/pages/MealPlansPage.tsx. Displays a list of MealPlanWeekRead cards using
       useMealPlans(). Each card shows the plan title, date range, and a meal count badge.
       Includes a "New plan" button that opens a create dialog. Empty state when no plans exist.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-hooks
 
@@ -66,7 +66,7 @@ todos:
       Create src/components/MealPlanCard.tsx. Displays a single MealPlanWeekRead summary:
       title, start_date to end_date, meal_count, and a button to navigate to the detail page.
       Include a delete action with a confirmation dialog.
-    status: pending
+    status: completed
     dependencies:
       - meal-plans-page
 
@@ -79,7 +79,7 @@ todos:
           (default: one entree slot per meal)
       Uses React Hook Form + Zod. On submit, calls useCreateMealPlan(); on success, navigates
       to the new plan's detail page.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-hooks
 
@@ -91,7 +91,7 @@ todos:
       "Generate recipes" button that calls useGenerateRecipes(). Disable the button and show
       a loading spinner while generation is in progress (mutation isPending).
       Link to the grocery list if one exists for this plan.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-hooks
 
@@ -101,7 +101,7 @@ todos:
       grid: meal name, list of PlannedMealCourse rows (role + optional description), and linked
       recipe title links. Clicking the meal name opens an inline edit for the name and status.
       Clicking a recipe title navigates to /recipes/:id.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-detail-page
 
@@ -113,7 +113,7 @@ todos:
         - CreateMealPlanDialog: form validation, submit calls mutation, navigates on success
         - useGenerateRecipes: invalidates recipe keys on success (test via MSW)
       Use renderWithProviders; MSW handlers for /meal-plans GET/POST and /generate-recipes POST.
-    status: pending
+    status: completed
     dependencies:
       - meal-plan-detail-page
       - create-meal-plan-dialog
@@ -123,16 +123,16 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | TypeScript types (MealPlanWeek, PlannedMeal, PlannedMealCourse) |
-| ⏳ Pending | Meal plan API functions |
-| ⏳ Pending | Query keys |
-| ⏳ Pending | Custom hooks |
-| ⏳ Pending | MealPlansPage (list + new plan button) |
-| ⏳ Pending | MealPlanCard component |
-| ⏳ Pending | CreateMealPlanDialog |
-| ⏳ Pending | MealPlanDetailPage (weekly grid + generate button) |
-| ⏳ Pending | PlannedMealSlot component |
-| ⏳ Pending | Tests |
+| ✅ Done | TypeScript types (MealPlanWeek, PlannedMeal, PlannedMealCourse) |
+| ✅ Done | Meal plan API functions |
+| ✅ Done | Query keys |
+| ✅ Done | Custom hooks |
+| ✅ Done | MealPlansPage (list + new plan button) |
+| ✅ Done | MealPlanCard component |
+| ✅ Done | CreateMealPlanDialog |
+| ✅ Done | MealPlanDetailPage (weekly grid + generate button) |
+| ✅ Done | PlannedMealSlot component |
+| ✅ Done | Tests |
 
 ---
 
