@@ -14,7 +14,7 @@ todos:
         RecipeSummaryRead (list: id, title, servings, source_model, created_at — no ingredients)
         RecipeCreate, RecipeUpdate
       source_model is null for manually created recipes and the AI model name for generated ones.
-    status: pending
+    status: completed
 
   - id: recipe-api
     content: >
