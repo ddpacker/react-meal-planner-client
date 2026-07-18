@@ -79,7 +79,7 @@ todos:
         - Edit button (opens RecipeEditForm)
         - ChatInterface (see chat.plan.md)
         - NutritionPanel (see nutrition.plan.md)
-    status: pending
+    status: completed
     dependencies:
       - recipe-hooks
 
