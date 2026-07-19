@@ -11,6 +11,8 @@ export type PlannedMealCourseRead = {
   id: number;
   role: MealCourseRole;
   description: string | null;
+  /** Present after recipe generation; null while the course is still a draft idea. */
+  recipe_id?: number | null;
   created_at: string;
   updated_at: string;
 };

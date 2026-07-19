@@ -14,7 +14,7 @@ todos:
         RecipeSummaryRead (list: id, title, servings, source_model, created_at — no ingredients)
         RecipeCreate, RecipeUpdate
       source_model is null for manually created recipes and the AI model name for generated ones.
-    status: pending
+    status: completed
 
   - id: recipe-api
     content: >
@@ -27,7 +27,7 @@ todos:
         deleteRecipe(id) -> void
         fetchNutrition(recipeId) -> NutritionInfoRead
         generateNutrition(recipeId) -> NutritionInfoRead
-    status: pending
+    status: completed
     dependencies:
       - recipe-types
 
@@ -35,7 +35,7 @@ todos:
     content: >
       Add recipeKeys to src/lib/queryKeys.ts:
         all, lists(), list(params), detail(id), byMeal(mealId), nutrition(recipeId)
-    status: pending
+    status: completed
     dependencies:
       - recipe-api
 
@@ -48,7 +48,7 @@ todos:
         useCreateRecipe() — useMutation; onSuccess: invalidate lists()
         useUpdateRecipe() — useMutation; onSuccess: invalidate detail(id) + lists()
         useDeleteRecipe() — useMutation; onSuccess: invalidate lists()
-    status: pending
+    status: completed
     dependencies:
       - recipe-query-keys
 
@@ -57,7 +57,7 @@ todos:
       Create src/components/RecipeCard.tsx. Displays a RecipeSummaryRead:
       title, servings, an AI-generated badge (when source_model is not null), and a delete
       button with confirmation. Clicking the card navigates to /recipes/:id.
-    status: pending
+    status: completed
     dependencies:
       - recipe-hooks
 
@@ -67,7 +67,7 @@ todos:
       library using useRecipes(). Includes a search text field (debounced, updates the
       query params), and a "New recipe" button that navigates to a create form or opens a
       dialog. Renders RecipeCard components in a grid. Shows an empty state when no recipes exist.
-    status: pending
+    status: completed
     dependencies:
       - recipe-card
 
@@ -79,7 +79,7 @@ todos:
         - Edit button (opens RecipeEditForm)
         - ChatInterface (see chat.plan.md)
         - NutritionPanel (see nutrition.plan.md)
-    status: pending
+    status: completed
     dependencies:
       - recipe-hooks
 
@@ -90,7 +90,7 @@ todos:
       (add/remove rows, each with name, quantity, unit, category). Quantities are entered in
       the user's preferred unit but submitted to the API in metric. Reuse for both
       POST /recipes (create) and PUT /recipes/:id (edit).
-    status: pending
+    status: completed
     dependencies:
       - recipe-detail-page
 
@@ -103,7 +103,7 @@ todos:
         - RecipeForm: add/remove ingredient rows, metric conversion on submit
         - useDeleteRecipe: invalidates lists() on success
       MSW handlers for GET /recipes, GET /recipes/:id, DELETE /recipes/:id.
-    status: pending
+    status: completed
     dependencies:
       - recipe-create-form
 ---
@@ -112,15 +112,15 @@ todos:
 
 | Status | Task |
 |--------|------|
-| ⏳ Pending | TypeScript types (RecipeRead, RecipeSummaryRead, RecipeCreate) |
-| ⏳ Pending | Recipe API functions |
-| ⏳ Pending | Query keys |
-| ⏳ Pending | Custom hooks |
-| ⏳ Pending | RecipeCard component |
-| ⏳ Pending | RecipesPage (library with search) |
-| ⏳ Pending | RecipeDetailPage (ingredients + chat + nutrition) |
-| ⏳ Pending | RecipeForm (create + edit, dynamic ingredient rows) |
-| ⏳ Pending | Tests |
+| ✅ Done | TypeScript types (RecipeRead, RecipeSummaryRead, RecipeCreate) |
+| ✅ Done | Recipe API functions |
+| ✅ Done | Query keys |
+| ✅ Done | Custom hooks |
+| ✅ Done | RecipeCard component |
+| ✅ Done | RecipesPage (library with search) |
+| ✅ Done | RecipeDetailPage (ingredients + chat + nutrition) |
+| ✅ Done | RecipeForm (create + edit, dynamic ingredient rows) |
+| ✅ Done | Tests |
 
 ---
 

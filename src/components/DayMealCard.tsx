@@ -1,7 +1,7 @@
 import { Chip } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { COURSE_ROLE_LABELS, DAY_LABELS, isFilledPlannedMeal } from '../lib/mealPlanDays';
-import type { PlannedMealRead } from '../types/mealPlan';
+import type { PlannedMealCourseRead, PlannedMealRead } from '../types/mealPlan';
 
 type DayMealCardProps = {
   dayIndex: number;
@@ -9,10 +9,23 @@ type DayMealCardProps = {
   onOpen: () => void;
 };
 
+function courseRecipeLabel(course: PlannedMealCourseRead): string {
+  if (course.description?.trim()) {
+    return course.description.trim();
+  }
+  return COURSE_ROLE_LABELS[course.role];
+}
+
 export function DayMealCard({ dayIndex, meal, onOpen }: DayMealCardProps) {
   const dayLabel = DAY_LABELS[dayIndex];
   const empty = !meal || !isFilledPlannedMeal(meal);
-  const recipes = !empty && meal?.recipes && meal.recipes.length > 0 ? meal.recipes : [];
+  const linkedCourses =
+    !empty && meal
+      ? meal.courses.filter(
+          (course): course is PlannedMealCourseRead & { recipe_id: number } =>
+            typeof course.recipe_id === 'number' && course.recipe_id > 0,
+        )
+      : [];
 
   return (
     <article className="flex min-h-44 flex-col overflow-hidden rounded-lg border border-border bg-paper">
@@ -43,22 +56,22 @@ export function DayMealCard({ dayIndex, meal, onOpen }: DayMealCardProps) {
                 />
               ))}
             </div>
-            {recipes.length === 0 ? (
+            {linkedCourses.length === 0 ? (
               <p className="mt-auto text-xs text-secondary">No recipes yet</p>
             ) : null}
           </>
         ) : null}
       </button>
 
-      {recipes.length > 0 ? (
+      {linkedCourses.length > 0 ? (
         <ul className="flex flex-col gap-1 border-t border-border px-4 py-3">
-          {recipes.map((recipe) => (
-            <li key={recipe.id}>
+          {linkedCourses.map((course) => (
+            <li key={course.id}>
               <RouterLink
-                to={`/recipes/${recipe.recipe_id}`}
+                to={`/recipes/${course.recipe_id}`}
                 className="text-sm text-primary underline-offset-2 hover:underline"
               >
-                {recipe.recipe_title ?? `Recipe ${recipe.recipe_id}`}
+                {courseRecipeLabel(course)}
               </RouterLink>
             </li>
           ))}
