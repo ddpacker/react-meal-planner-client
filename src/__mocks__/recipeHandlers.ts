@@ -3,6 +3,8 @@ import { API_BASE_URL } from './authHandlers';
 import { server } from './server';
 import type {
   RecipeCreate,
+  RecipeIngredientCreate,
+  RecipeIngredientRead,
   RecipeRead,
   RecipeSummaryRead,
   RecipeUpdate,
@@ -19,6 +21,26 @@ export const mockRecipeSummary = (
   ...overrides,
 });
 
+export const mockRecipeIngredient = (
+  overrides: Partial<RecipeIngredientRead> & {
+    ingredient?: Partial<RecipeIngredientRead['ingredient']>;
+  } = {},
+): RecipeIngredientRead => {
+  const { ingredient, ...rest } = overrides;
+  return {
+    id: 10,
+    quantity: 500,
+    unit: 'gram',
+    ingredient: {
+      id: 1,
+      name: 'Tomato',
+      category: 'Produce',
+      ...ingredient,
+    },
+    ...rest,
+  };
+};
+
 export const mockRecipe = (overrides: Partial<RecipeRead> = {}): RecipeRead => ({
   id: 1,
   title: 'Tomato Soup',
@@ -26,17 +48,37 @@ export const mockRecipe = (overrides: Partial<RecipeRead> = {}): RecipeRead => (
   instructions: 'Simmer and blend.',
   source_model: null,
   created_at: '2026-04-01T00:00:00Z',
-  ingredients: [
+  ingredients: [mockRecipeIngredient()],
+  steps: [
     {
-      id: 10,
-      name: 'Tomato',
-      quantity: 500,
-      unit: 'g',
-      category: 'produce',
+      id: 100,
+      step_number: 1,
+      text: 'Simmer tomatoes until soft.',
+    },
+    {
+      id: 101,
+      step_number: 2,
+      text: 'Blend until smooth.',
     },
   ],
   ...overrides,
 });
+
+function toIngredientRead(
+  ingredient: RecipeIngredientCreate,
+  index: number,
+): RecipeIngredientRead {
+  return {
+    id: 1000 + index,
+    quantity: ingredient.quantity,
+    unit: ingredient.unit,
+    ingredient: {
+      id: 2000 + index,
+      name: ingredient.name,
+      category: ingredient.category ?? null,
+    },
+  };
+}
 
 type ListHandlersOptions = {
   recipes?: RecipeSummaryRead[];
@@ -98,12 +140,9 @@ export function applyCreateRecipeHandler({
         {
           ...recipe,
           title: body.title,
-          servings: body.servings,
-          instructions: body.instructions,
-          ingredients: body.ingredients.map((ingredient, index) => ({
-            id: 1000 + index,
-            ...ingredient,
-          })),
+          servings: body.servings ?? recipe.servings,
+          instructions: body.instructions ?? recipe.instructions,
+          ingredients: body.ingredients.map(toIngredientRead),
         },
         { status: 201 },
       );
@@ -128,10 +167,7 @@ export function applyUpdateRecipeHandler({
         ...recipe,
         ...body,
         ingredients: body.ingredients
-          ? body.ingredients.map((ingredient, index) => ({
-              id: 1000 + index,
-              ...ingredient,
-            }))
+          ? body.ingredients.map(toIngredientRead)
           : recipe.ingredients,
       });
     }),

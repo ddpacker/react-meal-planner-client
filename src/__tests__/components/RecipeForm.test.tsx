@@ -73,7 +73,7 @@ describe('RecipeForm', () => {
         ingredients: [
           expect.objectContaining({
             name: 'Beef',
-            unit: 'g',
+            unit: 'gram',
             category: 'meat',
           }),
         ],

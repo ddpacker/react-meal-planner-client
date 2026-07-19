@@ -66,21 +66,19 @@ function defaultValues(
 
   return {
     title: recipe.title,
-    servings: recipe.servings,
-    instructions: recipe.instructions,
+    servings: recipe.servings ?? 4,
+    instructions: recipe.instructions ?? '',
     ingredients:
       recipe.ingredients.length > 0
-        ? recipe.ingredients.map((ingredient) => {
-            const display = fromMetricQuantity(
-              ingredient.quantity,
-              ingredient.unit,
-              unitSystem,
-            );
+        ? recipe.ingredients.map((row) => {
+            const qty = row.quantity ?? 1;
+            const unit = row.unit ?? defaultUnit;
+            const display = fromMetricQuantity(qty, unit, unitSystem);
             return {
-              name: ingredient.name,
+              name: row.ingredient.name,
               quantity: display.quantity,
               unit: display.unit,
-              category: ingredient.category,
+              category: (row.ingredient.category ?? 'other').toLowerCase(),
             };
           })
         : [{ ...emptyIngredient, unit: defaultUnit }],

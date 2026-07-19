@@ -82,16 +82,22 @@ export default function RecipeDetailPage() {
           <p className="text-sm text-secondary">No ingredients listed.</p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {recipe.ingredients.map((ingredient) => (
+            {recipe.ingredients.map((row) => (
               <li
-                key={ingredient.id}
+                key={row.id}
                 className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-2"
               >
-                <span className="text-primary">{ingredient.name}</span>
+                <span className="text-primary">{row.ingredient.name}</span>
                 <span className="text-sm text-secondary">
-                  {formatQuantity(ingredient.quantity, ingredient.unit, unitSystem)}
-                  {ingredient.category ? (
-                    <span className="ml-2 text-secondary">({ingredient.category})</span>
+                  {row.quantity != null && row.unit
+                    ? formatQuantity(row.quantity, row.unit, unitSystem)
+                    : row.quantity != null
+                      ? String(row.quantity)
+                      : '—'}
+                  {row.ingredient.category ? (
+                    <span className="ml-2 text-secondary">
+                      ({row.ingredient.category})
+                    </span>
                   ) : null}
                 </span>
               </li>
@@ -100,12 +106,28 @@ export default function RecipeDetailPage() {
         )}
       </section>
 
-      {recipe.instructions ? (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-medium text-primary">Instructions</h2>
-          <p className="whitespace-pre-wrap text-sm text-primary">{recipe.instructions}</p>
-        </section>
-      ) : null}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-medium text-primary">Steps</h2>
+        {(recipe.steps ?? []).length === 0 ? (
+          <p className="text-sm text-secondary">No steps listed.</p>
+        ) : (
+          <ol className="flex flex-col gap-4">
+            {[...(recipe.steps ?? [])]
+              .sort((a, b) => a.step_number - b.step_number)
+              .map((step) => (
+                <li key={step.id} className="flex gap-3">
+                  <span
+                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-xs font-medium text-primary"
+                    aria-hidden
+                  >
+                    {step.step_number}
+                  </span>
+                  <p className="text-sm text-primary">{step.text}</p>
+                </li>
+              ))}
+          </ol>
+        )}
+      </section>
 
       {/* ChatInterface — see chat.plan.md */}
       <section aria-label="Recipe chat" className="flex flex-col gap-2">
