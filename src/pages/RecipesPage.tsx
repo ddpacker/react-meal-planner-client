@@ -64,7 +64,7 @@ export default function RecipesPage() {
     !isLoading && !isError && recipes && recipes.length > 0 && filtered.length === 0;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 bg-background p-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-primary">Recipes</h1>
@@ -167,6 +167,6 @@ export default function RecipesPage() {
           />
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
   );
 }

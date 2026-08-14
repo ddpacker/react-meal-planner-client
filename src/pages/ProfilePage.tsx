@@ -4,7 +4,6 @@ import { ChangePasswordForm } from '../components/profile/ChangePasswordForm';
 import { DeleteAccountSection } from '../components/profile/DeleteAccountSection';
 import { UnitSystemPreference } from '../components/profile/UnitSystemPreference';
 import {
-  PageTemplate,
   PageTemplateFooter,
   PageTemplateHeader,
   PageTemplateLink,
@@ -20,7 +19,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <PageTemplate maxWidth="lg">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8 p-6">
       <PageTemplateHeader
         title="Profile"
         description="Manage your account and preferences."
@@ -60,6 +59,6 @@ export default function ProfilePage() {
       <PageTemplateFooter>
         <PageTemplateLink to="/">Back to meal plans</PageTemplateLink>
       </PageTemplateFooter>
-    </PageTemplate>
+    </div>
   );
 }

@@ -49,28 +49,28 @@ export default function MealPlanDetailPage() {
 
   if (!Number.isFinite(planId) || planId <= 0) {
     return (
-      <main className="mx-auto max-w-6xl bg-background p-6">
+      <div className="mx-auto max-w-6xl p-6">
         <Alert severity="error">Invalid meal plan.</Alert>
-      </main>
+      </div>
     );
   }
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex items-center justify-center p-6">
         <CircularProgress />
-      </main>
+      </div>
     );
   }
 
   if (isError || !plan) {
     return (
-      <main className="mx-auto max-w-6xl bg-background p-6">
+      <div className="mx-auto max-w-6xl p-6">
         <Alert severity="error">Could not load this meal plan.</Alert>
         <Button component={RouterLink} to="/" variant="text" color="primary" className="mt-4">
           Back to meal plans
         </Button>
-      </main>
+      </div>
     );
   }
 
@@ -78,7 +78,7 @@ export default function MealPlanDetailPage() {
   const dialogOpen = selectedDayIndex !== null;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 bg-background p-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 p-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm text-secondary">
@@ -150,6 +150,6 @@ export default function MealPlanDetailPage() {
           meal={daySlots[selectedDayIndex]}
         />
       ) : null}
-    </main>
+    </div>
   );
 }

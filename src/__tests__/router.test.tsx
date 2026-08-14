@@ -52,4 +52,39 @@ describe('router', () => {
       expect(screen.getByRole('heading', { name: /meal plans/i })).toBeInTheDocument();
     });
   });
+
+  it('shows app chrome on authenticated routes', async () => {
+    applyAuthenticatedSessionHandlers(mockUser);
+    renderApp('/');
+
+    await waitFor(() => {
+      expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
+    });
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Account menu' })).toBeInTheDocument();
+  });
+
+  it('shows app chrome on /grocery', async () => {
+    applyAuthenticatedSessionHandlers(mockUser);
+    renderApp('/grocery');
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /grocery list/i })).toBeInTheDocument();
+    });
+    expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    expect(screen.getByText(/no list selected/i)).toBeInTheDocument();
+  });
+
+  it('does not show app chrome on /login', async () => {
+    applyUnauthenticatedSessionHandlers();
+    renderApp('/login');
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('navigation', { name: 'Primary' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Account menu' })).not.toBeInTheDocument();
+  });
 });
