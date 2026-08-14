@@ -1,5 +1,13 @@
 import { useEffect } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import {
+  Controller,
+  useFieldArray,
+  useForm,
+  useWatch,
+  type Control,
+  type UseFormRegister,
+  type UseFormSetValue,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -13,7 +21,13 @@ import {
   MenuItem,
   TextField,
 } from '@mui/material';
-import { useUpdateMealPlan, useUpdatePlannedMeal } from '../hooks/useMealPlans';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  useGenerateCourseRecipe,
+  useIsCourseRecipeGenerating,
+  useUpdateMealPlan,
+  useUpdatePlannedMeal,
+} from '../hooks/useMealPlans';
 import {
   COURSE_ROLE_LABELS,
   DAY_LABELS,
@@ -36,6 +50,7 @@ const dayMealSchema = z.object({
     .array(
       z.object({
         id: z.number().optional(),
+        recipe_id: z.number().nullable().optional(),
         role: z.enum(courseRoles),
         description: z.string(),
       }),
@@ -71,13 +86,14 @@ export function DayMealDialog({ open, onClose, plan, dayIndex, meal }: DayMealDi
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<DayMealFormValues>({
     resolver: zodResolver(dayMealSchema),
     defaultValues: {
       meal_name: '',
       status: 'draft',
-      courses: [{ role: 'entree', description: '' }],
+      courses: [{ role: 'entree', description: '', recipe_id: null }],
     },
   });
 
@@ -97,16 +113,16 @@ export function DayMealDialog({ open, onClose, plan, dayIndex, meal }: DayMealDi
         meal && meal.courses.length > 0
           ? meal.courses.map((course) => ({
               id: course.id,
+              recipe_id: course.recipe_id ?? null,
               role: course.role,
               description: course.description ?? '',
             }))
-          : [{ role: 'entree' as const, description: '' }],
+          : [{ role: 'entree' as const, description: '', recipe_id: null }],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only when opening/switching day
   }, [open, dayIndex]);
 
-  const pending =
-    isSubmitting || updatePlannedMeal.isPending || updateMealPlan.isPending;
+  const pending = isSubmitting || updatePlannedMeal.isPending || updateMealPlan.isPending;
   const isError = updatePlannedMeal.isError || updateMealPlan.isError;
 
   const handleClose = () => {
@@ -198,7 +214,7 @@ export function DayMealDialog({ open, onClose, plan, dayIndex, meal }: DayMealDi
               <Button
                 type="button"
                 size="small"
-                onClick={() => append({ role: 'side', description: '' })}
+                onClick={() => append({ role: 'side', description: '', recipe_id: null })}
                 disabled={pending}
               >
                 Add course
@@ -210,37 +226,18 @@ export function DayMealDialog({ open, onClose, plan, dayIndex, meal }: DayMealDi
               </Alert>
             ) : null}
             {fields.map((field, index) => (
-              <div key={field.id} className="flex flex-col gap-2 rounded-md border border-border p-3">
-                <Controller
-                  name={`courses.${index}.role`}
-                  control={control}
-                  render={({ field: roleField }) => (
-                    <TextField {...roleField} label="Role" select fullWidth disabled={pending}>
-                      {courseRoles.map((role) => (
-                        <MenuItem key={role} value={role}>
-                          {COURSE_ROLE_LABELS[role]}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
-                />
-                <TextField
-                  label="Description (optional)"
-                  fullWidth
-                  disabled={pending}
-                  {...register(`courses.${index}.description`)}
-                />
-                <Button
-                  type="button"
-                  size="small"
-                  color="secondary"
-                  onClick={() => remove(index)}
-                  disabled={pending || fields.length <= 1}
-                  className="self-start"
-                >
-                  Remove course
-                </Button>
-              </div>
+              <CourseFields
+                key={field.id}
+                index={index}
+                planId={plan.id}
+                mealId={meal && isFilledPlannedMeal(meal) ? meal.id : null}
+                control={control}
+                register={register}
+                setValue={setValue}
+                savePending={pending}
+                canRemove={fields.length > 1}
+                onRemove={() => remove(index)}
+              />
             ))}
           </div>
         </DialogContent>
@@ -260,5 +257,124 @@ export function DayMealDialog({ open, onClose, plan, dayIndex, meal }: DayMealDi
         </DialogActions>
       </form>
     </Dialog>
+  );
+}
+
+type CourseFieldsProps = {
+  index: number;
+  planId: number;
+  mealId: number | null;
+  control: Control<DayMealFormValues>;
+  register: UseFormRegister<DayMealFormValues>;
+  setValue: UseFormSetValue<DayMealFormValues>;
+  savePending: boolean;
+  canRemove: boolean;
+  onRemove: () => void;
+};
+
+function CourseFields({
+  index,
+  planId,
+  mealId,
+  control,
+  register,
+  setValue,
+  savePending,
+  canRemove,
+  onRemove,
+}: CourseFieldsProps) {
+  const generateCourseRecipe = useGenerateCourseRecipe();
+  const courseId = useWatch({ control, name: `courses.${index}.id` });
+  const recipeId = useWatch({ control, name: `courses.${index}.recipe_id` });
+  const description = useWatch({ control, name: `courses.${index}.description` });
+  const generating = useIsCourseRecipeGenerating(courseId);
+  const hasRecipe = typeof recipeId === 'number' && recipeId > 0;
+  const canGenerate = mealId !== null && typeof courseId === 'number';
+
+  const onGenerate = () => {
+    if (mealId === null || typeof courseId !== 'number') {
+      return;
+    }
+    void generateCourseRecipe
+      .mutateAsync({
+        planId,
+        mealId,
+        courseId,
+      })
+      .then((recipe) => {
+        setValue(`courses.${index}.recipe_id`, recipe.id);
+        if (recipe.title.trim()) {
+          setValue(`courses.${index}.description`, recipe.title);
+        }
+      })
+      .catch(() => {
+        // Error surfaced via this row's mutation state.
+      });
+  };
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-border p-3">
+      {generateCourseRecipe.isError ? (
+        <Alert severity="error">Could not generate a recipe for this course. Please try again.</Alert>
+      ) : null}
+      <Controller
+        name={`courses.${index}.role`}
+        control={control}
+        render={({ field: roleField }) => (
+          <TextField {...roleField} label="Role" select fullWidth disabled={savePending}>
+            {courseRoles.map((role) => (
+              <MenuItem key={role} value={role}>
+                {COURSE_ROLE_LABELS[role]}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+      />
+      {hasRecipe ? (
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-primary">{description.trim() || 'Generated recipe'}</p>
+          <Button
+            component={RouterLink}
+            to={`/recipes/${recipeId}`}
+            size="small"
+            className="self-start"
+          >
+            View recipe
+          </Button>
+        </div>
+      ) : (
+        <TextField
+          label="Description (optional)"
+          fullWidth
+          disabled={savePending}
+          {...register(`courses.${index}.description`)}
+        />
+      )}
+      <div className="flex flex-wrap gap-2">
+        {!hasRecipe && canGenerate ? (
+          <Button
+            type="button"
+            size="small"
+            variant="outlined"
+            color="primary"
+            onClick={onGenerate}
+            disabled={savePending || generating}
+            startIcon={generating ? <CircularProgress size={14} color="inherit" /> : null}
+          >
+            Generate recipe
+          </Button>
+        ) : null}
+        <Button
+          type="button"
+          size="small"
+          color="secondary"
+          onClick={onRemove}
+          disabled={savePending || !canRemove}
+          className="self-start"
+        >
+          Remove course
+        </Button>
+      </div>
+    </div>
   );
 }
