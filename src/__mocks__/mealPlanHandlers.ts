@@ -8,6 +8,8 @@ import type {
   PlannedMealCreate,
   PlannedMealRead,
 } from '../types/mealPlan';
+import type { RecipeRead } from '../types/recipe';
+import { mockRecipe } from './recipeHandlers';
 
 export const mockPlannedMeal = (overrides: Partial<PlannedMealRead> = {}): PlannedMealRead => ({
   id: 10,
@@ -150,5 +152,58 @@ export function applyGenerateRecipesHandler({
       }
       return HttpResponse.json(plan);
     }),
+  );
+}
+
+type GenerateCourseHandlerOptions = {
+  plan: MealPlanWeekRead;
+  mealId: number;
+  courseId: number;
+  recipe?: RecipeRead;
+  delayMs?: number;
+  onRequest?: () => void;
+};
+
+export function applyGenerateCourseRecipeHandler({
+  plan,
+  mealId,
+  courseId,
+  recipe = mockRecipe({ id: 501, title: 'Generated Tacos', source_model: 'test-model' }),
+  delayMs = 0,
+  onRequest,
+}: GenerateCourseHandlerOptions): void {
+  server.use(
+    http.post(
+      `${API_BASE_URL}/meal-plans/${plan.id}/meals/${mealId}/courses/${courseId}/generate-recipe`,
+      async () => {
+        onRequest?.();
+        if (delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+        const updated: MealPlanWeekRead = {
+          ...plan,
+          planned_meals: plan.planned_meals.map((meal) =>
+            meal.id !== mealId
+              ? meal
+              : {
+                  ...meal,
+                  courses: meal.courses.map((course) =>
+                    course.id === courseId
+                      ? {
+                          ...course,
+                          recipe_id: recipe.id,
+                          description: recipe.title,
+                        }
+                      : course,
+                  ),
+                },
+          ),
+        };
+        server.use(
+          http.get(`${API_BASE_URL}/meal-plans/${plan.id}`, () => HttpResponse.json(updated)),
+        );
+        return HttpResponse.json(recipe);
+      },
+    ),
   );
 }

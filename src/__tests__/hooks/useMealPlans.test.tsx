@@ -4,12 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  applyGenerateCourseRecipeHandler,
   applyGenerateRecipesHandler,
   applyUpdateMealPlanHandler,
   mockMealPlan,
   mockPlannedMeal,
 } from '../../__mocks__/mealPlanHandlers';
-import { NoFilledMealsError, useGenerateRecipes } from '../../hooks/useMealPlans';
+import { NoFilledMealsError, useGenerateCourseRecipe, useGenerateRecipes } from '../../hooks/useMealPlans';
 import { mealPlanKeys, recipeKeys } from '../../lib/queryKeys';
 import { createTestQueryClient } from '../utils';
 
@@ -97,5 +98,37 @@ describe('useGenerateRecipes', () => {
         plannedMeals: plan.planned_meals,
       }),
     ).rejects.toBeInstanceOf(NoFilledMealsError);
+  });
+});
+
+describe('useGenerateCourseRecipe', () => {
+  it('invalidates meal plan detail and recipe keys on success', async () => {
+    const plan = mockMealPlan({
+      id: 7,
+      planned_meals: [mockPlannedMeal({ id: 10, meal_name: 'Tacos', day_index: 0 })],
+    });
+    applyGenerateCourseRecipeHandler({
+      plan,
+      mealId: 10,
+      courseId: 100,
+    });
+
+    const queryClient = createTestQueryClient();
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useGenerateCourseRecipe(), {
+      wrapper: createHookWrapper(queryClient),
+    });
+
+    await result.current.mutateAsync({
+      planId: 7,
+      mealId: 10,
+      courseId: 100,
+    });
+
+    await waitFor(() => {
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: mealPlanKeys.detail(7) });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: recipeKeys.lists() });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: recipeKeys.detail(501) });
+    });
   });
 });

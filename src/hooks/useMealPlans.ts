@@ -1,9 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useMutationState, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createMealPlan,
   deleteMealPlan,
   fetchMealPlan,
   fetchMealPlans,
+  generateCourseRecipe,
   generateRecipes,
   updateMealPlan,
   updatePlannedMeal,
@@ -123,4 +124,37 @@ export function useGenerateRecipes() {
       void queryClient.invalidateQueries({ queryKey: recipeKeys.lists() });
     },
   });
+}
+
+type GenerateCourseRecipeVars = {
+  planId: number;
+  mealId: number;
+  courseId: number;
+};
+
+const generateCourseRecipeKey = ['generateCourseRecipe'] as const;
+
+export function useGenerateCourseRecipe() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: generateCourseRecipeKey,
+    mutationFn: async ({ planId, mealId, courseId }: GenerateCourseRecipeVars) => {
+      const recipe = await generateCourseRecipe(planId, mealId, courseId);
+      // Invalidate here so in-flight generations still refresh cache if the dialog unmounts.
+      await queryClient.invalidateQueries({ queryKey: mealPlanKeys.detail(planId) });
+      await queryClient.invalidateQueries({ queryKey: recipeKeys.lists() });
+      await queryClient.invalidateQueries({ queryKey: recipeKeys.detail(recipe.id) });
+      return recipe;
+    },
+  });
+}
+
+export function useIsCourseRecipeGenerating(courseId: number | undefined): boolean {
+  const pendingCourseIds = useMutationState({
+    filters: { mutationKey: generateCourseRecipeKey, status: 'pending' },
+    select: (mutation) =>
+      (mutation.state.variables as GenerateCourseRecipeVars | undefined)?.courseId,
+  });
+  return typeof courseId === 'number' && pendingCourseIds.includes(courseId);
 }

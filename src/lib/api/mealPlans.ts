@@ -6,6 +6,7 @@ import type {
   PlannedMealRead,
   PlannedMealUpdate,
 } from '../../types/mealPlan';
+import type { RecipeRead } from '../../types/recipe';
 
 export async function fetchMealPlans(): Promise<MealPlanWeekRead[]> {
   const { data } = await apiClient.get<MealPlanWeekRead[]>('/meal-plans');
@@ -49,6 +50,17 @@ export async function updatePlannedMeal(
 export async function generateRecipes(planId: number): Promise<MealPlanWeekRead> {
   const { data } = await apiClient.post<MealPlanWeekRead>(
     `/meal-plans/${planId}/generate-recipes`,
+  );
+  return data;
+}
+
+export async function generateCourseRecipe(
+  planId: number,
+  mealId: number,
+  courseId: number,
+): Promise<RecipeRead> {
+  const { data } = await apiClient.post<RecipeRead>(
+    `/meal-plans/${planId}/meals/${mealId}/courses/${courseId}/generate-recipe`,
   );
   return data;
 }
