@@ -6,6 +6,8 @@ alwaysApply: false
 
 ## Server state — React Query v5
 
+Authoritative rules: [CONV-HOOKS](../../docs/CONVENTIONS.md#conv-hooks) and [CONV-QUERY-KEYS](../../docs/CONVENTIONS.md#conv-query-keys).
+
 - React Query owns all server state. Do not mirror API data into `useState`.
 - Encapsulate every `useQuery` / `useMutation` call inside a custom hook in `src/hooks/`.
 - Query key factories live in `src/lib/queryKeys.ts` — never inline string arrays.

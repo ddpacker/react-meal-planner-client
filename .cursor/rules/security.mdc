@@ -6,24 +6,22 @@ alwaysApply: true
 
 ## Auth tokens
 
-The app is deployed behind Azure Front Door, which terminates TLS and forwards requests to the FastAPI backend under the same origin as the frontend. This topology makes `SameSite=Strict` safe and eliminates the need for `withCredentials` on cross-origin requests.
+Auth transport is environment-split per [CONV-AUTH](../../docs/CONVENTIONS.md#conv-auth):
 
-The JWT is issued by the backend and delivered as a cookie with the following attributes — all three are required:
+- **Dev** (`npm run dev`): Bearer token returned from login/register JSON, stored in-memory
+  and `sessionStorage`. Sent via `Authorization: Bearer` header by the Axios request interceptor.
+- **Prod** (`npm run build`): `HttpOnly; Secure; SameSite=Strict` cookie only. The browser
+  attaches it automatically. The frontend never reads or stores the token value.
 
-- **`HttpOnly`** — the cookie is inaccessible to JavaScript. XSS cannot steal the token.
-- **`Secure`** — the cookie is only transmitted over HTTPS. Azure Front Door enforces this.
-- **`SameSite=Strict`** — the cookie is never sent on cross-site requests, providing CSRF protection without a separate token.
+`withCredentials: true` is set on the Axios instance for both environments.
 
-`localStorage` is explicitly prohibited for token storage. Storing JWTs in `localStorage` exposes them to any XSS payload on the page with no recovery path. The `HttpOnly` cookie approach is not a preference — it is the only acceptable mechanism.
-
-The frontend has no visibility into the cookie value and requires none. The browser attaches it automatically to every same-origin request.
+`localStorage` is prohibited for token storage in any environment.
 
 ## API requests
 
-- All requests go through the single Axios instance in `src/lib/api/client.ts` — never use `fetch` or a separate Axios instance.
-- Because Azure Front Door proxies the API under the same origin as the client, `withCredentials: true` is not required and must not be set — it has no effect for same-origin requests and would cause preflight failures if the origin ever differs.
+- All requests go through the single Axios instance in `src/lib/api/client.ts` per [CONV-API-CLIENT](../../docs/CONVENTIONS.md#conv-api-client) — never use `fetch` or a separate Axios instance.
 - Never pass the token as a query parameter or in the URL.
-- On a 401 response (token expired or revoked), the response interceptor redirects to `/login`; individual hooks do not need to handle this case.
+- On a 401 response (token expired or revoked), the response interceptor handles refresh and redirect to `/login`; individual hooks do not need to handle this case.
 
 ## Environment variables
 

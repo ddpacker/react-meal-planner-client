@@ -7,8 +7,8 @@ planner API at `VITE_API_BASE_URL`. Built with Vite, styled with Tailwind CSS v4
 React Query v5 handles server state; React Router v7 handles navigation; React Hook Form +
 Zod handles forms.
 
-Deployed to Azure Static Web Apps behind Azure Front Door (same-origin as the FastAPI backend),
-which is what makes `SameSite=Strict` JWT cookies work without `withCredentials`.
+Deployed to Azure Static Web Apps behind Azure Front Door (same-origin as the FastAPI backend).
+Auth transport differs by build environment — see [CONV-AUTH](docs/CONVENTIONS.md#conv-auth).
 
 ## Run commands
 
@@ -31,6 +31,7 @@ VITE_API_BASE_URL=http://localhost:8000
 ## Documentation
 
 @docs/ARCHITECTURE.md
+@docs/CONVENTIONS.md
 @docs/SETUP.md
 
 ## Coding standards
@@ -43,10 +44,13 @@ VITE_API_BASE_URL=http://localhost:8000
 
 ## Key source conventions
 
-- **One Axios instance** — `src/lib/api/client.ts`. Never import Axios elsewhere.
-- **Query keys** — all in `src/lib/queryKeys.ts`. Never inline string arrays.
-- **Hooks** — all `useQuery` / `useMutation` calls live in `src/hooks/`. Never in components.
-- **Types** — `src/types/` mirrors backend Pydantic schemas (`*Read`, `*Create`, `*Update`).
-- **Auth** — JWT is `HttpOnly` cookie; frontend never reads the token value.
-- **Units** — API always returns metric. Unit preference is display-only; never submit imperial values.
-- **Tests** — co-locate under `src/__tests__/`; use `renderWithProviders`; mock API with MSW.
+Cross-cutting decisions live in `docs/CONVENTIONS.md` with stable CONV-* IDs. Quick index:
+
+- **[CONV-AUTH](docs/CONVENTIONS.md#conv-auth)** — Bearer token in dev, HttpOnly cookie in prod
+- **[CONV-API-CLIENT](docs/CONVENTIONS.md#conv-api-client)** — one Axios instance; never import `axios` directly
+- **[CONV-QUERY-KEYS](docs/CONVENTIONS.md#conv-query-keys)** — all keys in `queryKeys.ts`; never inline
+- **[CONV-HOOKS](docs/CONVENTIONS.md#conv-hooks)** — `useQuery`/`useMutation` only in `src/hooks/`
+- **[CONV-UNITS](docs/CONVENTIONS.md#conv-units)** — API always metric; display-only conversion
+- **[CONV-TYPES](docs/CONVENTIONS.md#conv-types)** — `*Read/*Create/*Update`; Zod schema is source of truth
+- **[CONV-STYLING](docs/CONVENTIONS.md#conv-styling)** — Tailwind for layout, MUI for interactive, `tokens.ts` for color
+- **Tests** — `src/__tests__/`; use `renderWithProviders`; mock API with MSW
