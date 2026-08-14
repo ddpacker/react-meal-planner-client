@@ -1,5 +1,6 @@
 import { createBrowserRouter, Outlet, type RouteObject } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { AppShell } from './components/layout/AppShell';
 import { RequireAuth } from './components/RequireAuth';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -26,12 +27,18 @@ export function createAppRoutes(): RouteObject[] {
         {
           element: <RequireAuth />,
           children: [
-            { index: true, element: <MealPlansPage /> },
-            { path: 'meal-plans/:id', element: <MealPlanDetailPage /> },
-            { path: 'recipes', element: <RecipesPage /> },
-            { path: 'recipes/:id', element: <RecipeDetailPage /> },
-            { path: 'grocery/:listId', element: <GroceryListPage /> },
-            { path: 'profile', element: <ProfilePage /> },
+            {
+              element: <AppShell />,
+              children: [
+                { index: true, element: <MealPlansPage /> },
+                { path: 'meal-plans/:id', element: <MealPlanDetailPage /> },
+                { path: 'recipes', element: <RecipesPage /> },
+                { path: 'recipes/:id', element: <RecipeDetailPage /> },
+                { path: 'grocery', element: <GroceryListPage /> },
+                { path: 'grocery/:listId', element: <GroceryListPage /> },
+                { path: 'profile', element: <ProfilePage /> },
+              ],
+            },
           ],
         },
       ],

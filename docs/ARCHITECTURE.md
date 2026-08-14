@@ -19,6 +19,7 @@ flowchart TD
 ```
 src/
   components/        # Shared, reusable UI components (PascalCase, named exports)
+    layout/          # AppShell (authenticated chrome) vs PageTemplate (auth cards)
   pages/             # Route-level components (one per route, default export ok)
   hooks/             # Custom hooks (useXxx.ts) — all useQuery/useMutation calls live here
   context/
@@ -51,11 +52,12 @@ All authenticated routes are wrapped in `<RequireAuth>`, which blocks rendering 
 /login                  LoginPage
 /register               RegisterPage
 /auth/google/callback   GoogleCallbackPage   — handles OIDC redirect, then navigates to /
-/ (RequireAuth)
+/ (RequireAuth → AppShell)
   /                     MealPlansPage        — list of weekly plans
   /meal-plans/:id       MealPlanDetailPage   — plan + meals + generate-recipes trigger
   /recipes              RecipesPage          — recipe library with search
   /recipes/:id          RecipeDetailPage     — recipe + ingredients + chat + nutrition
+  /grocery              GroceryListPage      — stub index when no list is selected
   /grocery/:listId      GroceryListPage      — checklist view
   /profile              ProfilePage          — user settings, unit preference
 ```
@@ -170,6 +172,7 @@ The backend always returns metric units. `UserPreferences.unit_system` (`metric`
 - **MUI v9** — interactive components: `Button`, `TextField`, `Select`, `Dialog`, `Snackbar`, `CircularProgress`, `Chip`, etc.
 - **`src/lib/theme/tokens.ts`** — single source of truth for brand colours. Never add hex literals to pages or components. See [CONV-STYLING](CONVENTIONS.md#conv-styling).
 - Keep the two systems separated: Tailwind on wrappers/layout, MUI `sx` for component-level overrides.
+- Authenticated routes render inside `AppShell` (`src/components/layout/AppShell.tsx`) — header, nav, and footer. Login, register, and similar standalone flows keep using `PageTemplate`.
 
 ## 11. Non-obvious mutation behaviors
 

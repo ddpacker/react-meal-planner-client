@@ -23,25 +23,25 @@ export default function RecipeDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="flex items-center justify-center p-6">
         <CircularProgress />
-      </main>
+      </div>
     );
   }
 
   if (isError || !recipe) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 bg-background p-6">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 p-6">
         <Alert severity="error">Could not load this recipe. Please try again.</Alert>
         <Button component={RouterLink} to="/recipes" variant="outlined" color="primary">
           Back to recipes
         </Button>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 bg-background p-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8 p-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           <Button
@@ -156,6 +156,6 @@ export default function RecipeDetailPage() {
           />
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
   );
 }
