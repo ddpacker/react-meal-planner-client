@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createRecipe,
   deleteRecipe,
+  fetchNutrition,
   fetchRecipe,
   fetchRecipes,
   fetchRecipesByMeal,
+  generateNutrition,
   type FetchRecipesParams,
   updateRecipe,
 } from '../lib/api/recipes';
@@ -34,6 +36,14 @@ export function useRecipesByMeal(mealId: number) {
   });
 }
 
+export function useNutrition(recipeId: number) {
+  return useQuery({
+    queryKey: recipeKeys.nutrition(recipeId),
+    queryFn: () => fetchNutrition(recipeId),
+    enabled: Number.isFinite(recipeId) && recipeId > 0,
+  });
+}
+
 export function useCreateRecipe() {
   const queryClient = useQueryClient();
 
@@ -54,6 +64,18 @@ export function useUpdateRecipe() {
     onSuccess: (_data, { id }) => {
       void queryClient.invalidateQueries({ queryKey: recipeKeys.detail(id) });
       void queryClient.invalidateQueries({ queryKey: recipeKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: recipeKeys.nutrition(id) });
+    },
+  });
+}
+
+export function useGenerateNutrition() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (recipeId: number) => generateNutrition(recipeId),
+    onSuccess: (data, recipeId) => {
+      queryClient.setQueryData(recipeKeys.nutrition(recipeId), data);
     },
   });
 }

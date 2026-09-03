@@ -56,7 +56,7 @@ All authenticated routes are wrapped in `<RequireAuth>`, which blocks rendering 
   /                     MealPlansPage        — list of weekly plans
   /meal-plans/:id       MealPlanDetailPage   — plan + meals + generate-recipes trigger
   /recipes              RecipesPage          — recipe library with search
-  /recipes/:id          RecipeDetailPage     — recipe + ingredients + chat + nutrition
+  /recipes/:id          RecipeDetailPage     — tabs: Recipe (ingredients + steps) | Nutrition
   /grocery              GroceryListPage      — stub index when no list is selected
   /grocery/:listId      GroceryListPage      — checklist view
   /profile              ProfilePage          — user settings, unit preference

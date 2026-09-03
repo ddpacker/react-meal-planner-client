@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Route, Routes } from 'react-router-dom';
 import {
+  applyNutritionHandlers,
   applyRecipeDetailHandlers,
+  mockNutrition,
   mockRecipe,
   mockRecipeIngredient,
 } from '../../__mocks__/recipeHandlers';
@@ -132,5 +135,40 @@ describe('RecipeDetailPage', () => {
       .map((node) => node.textContent);
     expect(stepTexts[0]).toMatch(/pickled slaw/);
     expect(stepTexts[1]).toMatch(/sriracha mayo/);
+  });
+
+  it('switches to the Nutrition tab and shows the facts label', async () => {
+    applyRecipeDetailHandlers({ recipe: mockRecipe({ id: 1 }) });
+    applyNutritionHandlers({
+      recipeId: 1,
+      nutrition: mockNutrition({ calories: 275, fat_g: null }),
+    });
+
+    const user = userEvent.setup();
+    renderDetailPage(1);
+
+    expect(await screen.findByRole('heading', { name: 'Tomato Soup' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'Nutrition' }));
+
+    expect(await screen.findByLabelText('Nutrition facts')).toBeInTheDocument();
+    expect(screen.getByText('275')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('shows a calculate CTA on Nutrition when data is missing', async () => {
+    applyRecipeDetailHandlers({ recipe: mockRecipe({ id: 1 }) });
+    applyNutritionHandlers({ recipeId: 1, nutrition: null });
+
+    const user = userEvent.setup();
+    renderDetailPage(1);
+
+    expect(await screen.findByRole('heading', { name: 'Tomato Soup' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'Nutrition' }));
+
+    expect(
+      await screen.findByRole('button', { name: /Calculate nutrition/i }),
+    ).toBeInTheDocument();
   });
 });
