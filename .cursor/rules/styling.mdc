@@ -29,7 +29,7 @@ All new pages and components must use the shared theme — never introduce ad-ho
 
 - `src/lib/theme/muiTheme.ts` — MUI `createTheme` (palette, typography, component overrides)
 - `src/lib/theme/AppThemeProvider.tsx` — wraps the app; already mounted in `main.tsx`
-- `src/index.css` — Tailwind `@theme inline` maps semantic utilities to CSS vars (`--mp-*`)
+- `src/styles/index.css` — Tailwind `@theme inline` maps semantic utilities to CSS vars (`--mp-*`)
 
 **Adding or changing colours:**
 

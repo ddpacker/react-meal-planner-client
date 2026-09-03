@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './scrollbar.css';
 
 @theme inline {
   --color-background: var(--mp-background);
