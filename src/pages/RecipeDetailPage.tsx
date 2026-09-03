@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import {
   Alert,
+  Box,
   Button,
   Chip,
   CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import { Link as RouterLink, useParams } from 'react-router-dom';
+import { NutritionFactsPanel } from '../components/NutritionFactsPanel';
 import { RecipeForm } from '../components/RecipeForm';
 import { useAuth } from '../context/AuthContext';
 import { useRecipe } from '../hooks/useRecipes';
@@ -20,6 +24,7 @@ export default function RecipeDetailPage() {
   const { unitSystem } = useAuth();
   const { data: recipe, isLoading, isError } = useRecipe(recipeId);
   const [editOpen, setEditOpen] = useState(false);
+  const [tab, setTab] = useState(0);
 
   if (isLoading) {
     return (
@@ -41,7 +46,7 @@ export default function RecipeDetailPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-8 p-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           <Button
@@ -76,70 +81,97 @@ export default function RecipeDetailPage() {
         </Button>
       </header>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium text-primary">Ingredients</h2>
-        {recipe.ingredients.length === 0 ? (
-          <p className="text-sm text-secondary">No ingredients listed.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {recipe.ingredients.map((row) => (
-              <li
-                key={row.id}
-                className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-2"
-              >
-                <span className="text-primary">{row.ingredient.name}</span>
-                <span className="text-sm text-secondary">
-                  {row.quantity != null && row.unit
-                    ? formatQuantity(row.quantity, row.unit, unitSystem)
-                    : row.quantity != null
-                      ? String(row.quantity)
-                      : '—'}
-                  {row.ingredient.category ? (
-                    <span className="ml-2 text-secondary">
-                      ({row.ingredient.category})
-                    </span>
-                  ) : null}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <Tabs
+        value={tab}
+        onChange={(_event, value: number) => setTab(value)}
+        aria-label="Recipe detail sections"
+      >
+        <Tab label="Recipe" id="recipe-tab-0" aria-controls="recipe-tabpanel-0" />
+        <Tab
+          label="Nutrition"
+          id="recipe-tab-1"
+          aria-controls="recipe-tabpanel-1"
+        />
+      </Tabs>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-medium text-primary">Steps</h2>
-        {(recipe.steps ?? []).length === 0 ? (
-          <p className="text-sm text-secondary">No steps listed.</p>
-        ) : (
-          <ol className="flex flex-col gap-4">
-            {[...(recipe.steps ?? [])]
-              .sort((a, b) => a.step_number - b.step_number)
-              .map((step) => (
-                <li key={step.id} className="flex gap-3">
-                  <span
-                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-xs font-medium text-primary"
-                    aria-hidden
-                  >
-                    {step.step_number}
-                  </span>
-                  <p className="text-sm text-primary">{step.text}</p>
-                </li>
-              ))}
-          </ol>
-        )}
-      </section>
+      <Box
+        role="tabpanel"
+        id="recipe-tabpanel-0"
+        aria-labelledby="recipe-tab-0"
+        hidden={tab !== 0}
+        className="flex flex-col gap-8"
+      >
+        {tab === 0 ? (
+          <>
+            <section className="flex flex-col gap-3">
+              <h2 className="text-lg font-medium text-primary">Ingredients</h2>
+              {recipe.ingredients.length === 0 ? (
+                <p className="text-sm text-secondary">No ingredients listed.</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {recipe.ingredients.map((row) => (
+                    <li
+                      key={row.id}
+                      className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-2"
+                    >
+                      <span className="text-primary">{row.ingredient.name}</span>
+                      <span className="text-sm text-secondary">
+                        {row.quantity != null && row.unit
+                          ? formatQuantity(row.quantity, row.unit, unitSystem)
+                          : row.quantity != null
+                            ? String(row.quantity)
+                            : '—'}
+                        {row.ingredient.category ? (
+                          <span className="ml-2 text-secondary">
+                            ({row.ingredient.category})
+                          </span>
+                        ) : null}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
 
-      {/* ChatInterface — see chat.plan.md */}
-      <section aria-label="Recipe chat" className="flex flex-col gap-2">
-        <h2 className="text-lg font-medium text-primary">Chat</h2>
-        <p className="text-sm text-secondary">Chat will appear here when available.</p>
-      </section>
+            <section className="flex flex-col gap-3">
+              <h2 className="text-lg font-medium text-primary">Steps</h2>
+              {(recipe.steps ?? []).length === 0 ? (
+                <p className="text-sm text-secondary">No steps listed.</p>
+              ) : (
+                <ol className="flex flex-col gap-4">
+                  {[...(recipe.steps ?? [])]
+                    .sort((a, b) => a.step_number - b.step_number)
+                    .map((step) => (
+                      <li key={step.id} className="flex gap-3">
+                        <span
+                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-xs font-medium text-primary"
+                          aria-hidden
+                        >
+                          {step.step_number}
+                        </span>
+                        <p className="text-sm text-primary">{step.text}</p>
+                      </li>
+                    ))}
+                </ol>
+              )}
+            </section>
+          </>
+        ) : null}
+      </Box>
 
-      {/* NutritionPanel — see nutrition.plan.md */}
-      <section aria-label="Recipe nutrition" className="flex flex-col gap-2">
-        <h2 className="text-lg font-medium text-primary">Nutrition</h2>
-        <p className="text-sm text-secondary">Nutrition will appear here when available.</p>
-      </section>
+      <Box
+        role="tabpanel"
+        id="recipe-tabpanel-1"
+        aria-labelledby="recipe-tab-1"
+        hidden={tab !== 1}
+      >
+        {tab === 1 ? (
+          <NutritionFactsPanel
+            recipeId={recipe.id}
+            servings={recipe.servings}
+          />
+        ) : null}
+      </Box>
 
       <Dialog
         open={editOpen}
