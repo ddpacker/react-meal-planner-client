@@ -11,6 +11,10 @@ type MealPlanCarouselProps = {
 type CardTransform = {
   opacity: number;
   angleDeg: number;
+  /** Distance from focus in slot strides — drives shadow strength. */
+  depth: number;
+  /** -1 above center, 0 at focus, +1 below — shadow casts away from focus. */
+  side: number;
   zIndex: number;
 };
 
@@ -48,6 +52,8 @@ function transformsForOffset(offsetPx: number): CardTransform {
   return {
     // Negative so cards below center travel down the cylinder (not tip forward).
     angleDeg: (-thetaRad * 180) / Math.PI,
+    depth: absSteps,
+    side: Math.sign(offsetPx),
     opacity,
     zIndex: Math.round(100 - absSteps * 20),
   };
@@ -56,6 +62,8 @@ function transformsForOffset(offsetPx: number): CardTransform {
 const DEFAULT_TRANSFORM: CardTransform = {
   opacity: 1,
   angleDeg: 0,
+  depth: 0,
+  side: 0,
   zIndex: 0,
 };
 
@@ -133,8 +141,11 @@ export function MealPlanCarousel({
           transform: `translateZ(${-CYLINDER_RADIUS}px)`,
         }}
       >
-        {slots.map((slot, index) => {
-          const t = transforms[index] ?? DEFAULT_TRANSFORM;
+        {[...slots]
+          .map((slot, index) => ({ slot, index, t: transforms[index] ?? DEFAULT_TRANSFORM }))
+          // Furthest first so the focused card paints on top if depth-sort falters.
+          .sort((a, b) => b.t.depth - a.t.depth)
+          .map(({ slot, index, t }) => {
           const offsetPx = cardCenterY(index) - focusOffsetY;
           return (
             <div
@@ -143,17 +154,19 @@ export function MealPlanCarousel({
               style={{
                 top: cardCenterY(index) - CARD_HEIGHT / 2,
                 height: CARD_HEIGHT,
-                opacity: t.opacity,
                 zIndex: t.zIndex,
                 // Move to wheel axis (viewport center), rotate, push out to rim.
                 transform: `translateY(${-offsetPx}px) rotateX(${t.angleDeg}deg) translateZ(${CYLINDER_RADIUS}px)`,
                 transformStyle: 'preserve-3d',
                 backfaceVisibility: 'hidden',
-                willChange: 'transform, opacity',
+                willChange: 'transform',
               }}
             >
               <MealPlanWeekCard
                 slot={slot}
+                depth={t.depth}
+                side={t.side}
+                fade={t.opacity}
                 disabled={busyMondayIso === slot.mondayIso}
                 onActivate={onActivate}
               />
