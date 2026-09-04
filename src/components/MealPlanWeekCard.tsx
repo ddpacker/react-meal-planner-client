@@ -1,6 +1,15 @@
 import { brandColorWithAlpha } from '../lib/theme/tokens';
 import type { MealPlanCarouselSlot } from '../lib/mealPlanDays';
 
+const FOCUS_DEPTH = 0.45;
+const THUMBNAIL_PLACEHOLDER_COUNT = 7;
+
+/** Monday = 0 … Sunday = 6, matching DAY_LABELS order. */
+function todayThumbnailIndex(from: Date = new Date()): number {
+  const day = from.getDay();
+  return day === 0 ? 6 : day - 1;
+}
+
 type MealPlanWeekCardProps = {
   slot: MealPlanCarouselSlot;
   disabled?: boolean;
@@ -33,7 +42,7 @@ function statusLabel(slot: MealPlanCarouselSlot): string {
 function shadowForDepth(depth: number, side: number): string {
   const primary = (opacity: number) => brandColorWithAlpha('primary', opacity);
 
-  if (depth < 0.45) {
+  if (depth < FOCUS_DEPTH) {
     // Symmetric casts onto the layers behind (tight spread so blur stays off-card).
     return [
       `0 -36px 72px -20px ${primary(0.4)}`,
@@ -63,12 +72,15 @@ export function MealPlanWeekCard({
   fade = 1,
   onActivate,
 }: MealPlanWeekCardProps) {
+  const isCentered = depth < FOCUS_DEPTH;
+  const todayIndex = todayThumbnailIndex();
+
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={() => onActivate(slot)}
-      className={`flex h-full w-full flex-col gap-2 rounded-2xl border border-border bg-paper px-6 py-5 text-left transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-70 ${
+      className={`group flex h-full w-full items-center gap-4 rounded-2xl border border-border bg-paper px-6 py-5 text-left transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-70 ${
         slot.isCurrentWeek
           ? 'border-l-[10px] border-l-secondary hover:border-l-secondary'
           : ''
@@ -80,11 +92,30 @@ export function MealPlanWeekCard({
       }}
       aria-label={`${slot.title}. ${statusLabel(slot)}`}
     >
-      <span className="text-lg font-medium text-primary">{slot.title}</span>
-      <span className="text-sm text-secondary">{statusLabel(slot)}</span>
-      {slot.isCurrentWeek ? (
-        <span className="text-xs font-medium uppercase tracking-wide text-secondary">
-          Current week
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="truncate text-lg font-medium text-primary">{slot.title}</span>
+        <span className="text-sm text-secondary">{statusLabel(slot)}</span>
+        {slot.isCurrentWeek ? (
+          <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+            Current week
+          </span>
+        ) : null}
+      </span>
+      {isCentered ? (
+        <span className="flex shrink-0 justify-end gap-1.5" aria-hidden="true">
+          {Array.from({ length: THUMBNAIL_PLACEHOLDER_COUNT }, (_, i) => {
+            const isToday = slot.isCurrentWeek && i === todayIndex;
+            return (
+              <span
+                key={i}
+                className={`size-18 rounded-md border border-border bg-primary-subtle transition-[box-shadow] duration-200 ${
+                  isToday
+                    ? 'group-hover:shadow-[0_0_14px_4px_var(--mp-secondary),0_0_28px_8px_var(--mp-secondary-24)]'
+                    : ''
+                }`}
+              />
+            );
+          })}
         </span>
       ) : null}
     </button>
