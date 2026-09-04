@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import {
@@ -32,6 +32,15 @@ function renderMealPlansPage() {
     </Routes>,
     { initialEntries: ['/'] },
   );
+}
+
+/** jsdom does not emit `scroll` when scrollTop is set — flush carousel focus. */
+async function flushCarouselScroll() {
+  const scroller = screen.getByLabelText(/meal plan weeks/i);
+  await act(async () => {
+    scroller.dispatchEvent(new Event('scroll'));
+    await vi.runAllTimersAsync();
+  });
 }
 
 describe('MealPlansPage', () => {
@@ -116,7 +125,16 @@ describe('MealPlansPage', () => {
     renderMealPlansPage();
 
     await screen.findByText('Week of July 20th');
-    await user.click(screen.getByRole('button', { name: /week of july 20th/i }));
+    const forwardSlot = () =>
+      screen.getByRole('button', { name: /week of july 20th/i });
+
+    // Off-center click scrolls into focus; centered click creates the plan.
+    await user.click(forwardSlot());
+    await flushCarouselScroll();
+    await waitFor(() => {
+      expect(forwardSlot().querySelector('[aria-hidden="true"]')).not.toBeNull();
+    });
+    await user.click(forwardSlot());
 
     await waitFor(() => {
       expect(screen.getByTestId('pathname')).toHaveTextContent('/meal-plans/42');
