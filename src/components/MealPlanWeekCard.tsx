@@ -36,8 +36,8 @@ function shadowForDepth(depth: number, side: number): string {
   if (depth < 0.45) {
     // Symmetric casts onto the layers behind (tight spread so blur stays off-card).
     return [
-      `0 -26px 26px -20px ${primary(0.3)}`,
-      `0 26px 26px -20px ${primary(0.3)}`,
+      `0 -36px 72px -20px ${primary(0.4)}`,
+      `0 36px 72px -20px ${primary(0.4)}`,
       `0 -12px 12px -8px ${primary(0.14)}`,
       `0 12px 12px -8px ${primary(0.14)}`,
     ].join(', ');

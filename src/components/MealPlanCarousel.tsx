@@ -20,7 +20,7 @@ type CardTransform = {
 
 const CARD_HEIGHT = 120;
 /** Small seam between faces on the cylinder (not flush, not a wide gutter). */
-const CARD_GAP = 60;
+const CARD_GAP = 10;
 const SLOT_STRIDE = CARD_HEIGHT + CARD_GAP;
 /** Vertical padding so the first/last card can sit in the viewport center. */
 const EDGE_PAD = 200;
