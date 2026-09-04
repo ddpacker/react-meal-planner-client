@@ -68,7 +68,11 @@ export function MealPlanWeekCard({
       type="button"
       disabled={disabled}
       onClick={() => onActivate(slot)}
-      className="flex h-full w-full flex-col gap-2 rounded-2xl border border-border bg-paper px-6 py-5 text-left transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-70"
+      className={`flex h-full w-full flex-col gap-2 rounded-2xl border border-border bg-paper px-6 py-5 text-left transition-colors hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-70 ${
+        slot.isCurrentWeek
+          ? 'border-l-[10px] border-l-secondary hover:border-l-secondary'
+          : ''
+      }`}
       style={{
         opacity: fade,
         transformStyle: 'preserve-3d',
