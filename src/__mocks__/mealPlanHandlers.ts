@@ -4,6 +4,7 @@ import { server } from './server';
 import type {
   MealPlanWeekCreate,
   MealPlanWeekRead,
+  MealPlanWeekSummaryRead,
   MealPlanWeekUpdate,
   PlannedMealCreate,
   PlannedMealRead,
@@ -59,15 +60,30 @@ export const mockMealPlan = (overrides: Partial<MealPlanWeekRead> = {}): MealPla
   updated_at: '2026-04-01T00:00:00Z',
   planned_meals: [mockPlannedMeal()],
   meal_count: 1,
+  has_grocery_list: false,
+  ...overrides,
+});
+
+export const mockMealPlanSummary = (
+  overrides: Partial<MealPlanWeekSummaryRead> = {},
+): MealPlanWeekSummaryRead => ({
+  id: 1,
+  title: 'Spring Week',
+  start_date: '2026-04-14',
+  end_date: '2026-04-20',
+  created_at: '2026-04-01T00:00:00Z',
+  updated_at: '2026-04-01T00:00:00Z',
+  meal_count: 1,
+  has_grocery_list: false,
   ...overrides,
 });
 
 type ListHandlersOptions = {
-  plans?: MealPlanWeekRead[];
+  plans?: MealPlanWeekSummaryRead[];
 };
 
 export function applyMealPlansListHandlers({
-  plans = [mockMealPlan()],
+  plans = [mockMealPlanSummary()],
 }: ListHandlersOptions = {}): void {
   server.use(
     http.get(`${API_BASE_URL}/meal-plans`, () => HttpResponse.json(plans)),

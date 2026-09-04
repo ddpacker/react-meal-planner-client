@@ -1,7 +1,6 @@
 import { useMutation, useMutationState, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createMealPlan,
-  deleteMealPlan,
   fetchMealPlan,
   fetchMealPlans,
   generateCourseRecipe,
@@ -53,17 +52,6 @@ export function useUpdateMealPlan() {
     onSuccess: async (_data, { id }) => {
       await queryClient.invalidateQueries({ queryKey: mealPlanKeys.detail(id) });
       await queryClient.refetchQueries({ queryKey: mealPlanKeys.detail(id) });
-    },
-  });
-}
-
-export function useDeleteMealPlan() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number) => deleteMealPlan(id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: mealPlanKeys.lists() });
     },
   });
 }
