@@ -36,7 +36,7 @@ src/
       chat.ts        # sessions + messages
       grocery.ts     # list + items + export
       user.ts        # me, preferences
-    mealPlanDays.ts  # Day/course label constants + isFilledPlannedMeal + toPlannedMealCreates
+    mealPlanDays.ts  # Week Monday math, carousel slots, day/course labels, filled-meal helpers
     queryKeys.ts     # All React Query key factories
     theme/           # MUI theme + Tailwind token definitions
   types/             # TypeScript types mirroring backend Pydantic schemas
@@ -53,7 +53,7 @@ All authenticated routes are wrapped in `<RequireAuth>`, which blocks rendering 
 /register               RegisterPage
 /auth/google/callback   GoogleCallbackPage   — handles OIDC redirect, then navigates to /
 / (RequireAuth → AppShell)
-  /                     MealPlansPage        — list of weekly plans
+  /                     MealPlansPage        — cylinder carousel of week slots
   /meal-plans/:id       MealPlanDetailPage   — plan + meals + generate-recipes trigger
   /recipes              RecipesPage          — recipe library with search
   /recipes/:id          RecipeDetailPage     — tabs: Recipe (ingredients + steps) | Nutrition
@@ -61,6 +61,13 @@ All authenticated routes are wrapped in `<RequireAuth>`, which blocks rendering 
   /grocery/:listId      GroceryListPage      — checklist view
   /profile              ProfilePage          — user settings, unit preference
 ```
+
+### Meal plans index (`MealPlansPage`)
+
+- Vertical CSS 3D carousel (`MealPlanCarousel` + `MealPlanWeekCard`): `perspective` + `preserve-3d` + scroll-driven `rotateX` / scale / opacity. The three cards nearest the viewport center stay fully opaque; farther cards fade as they curve away.
+- Slot model from `buildCarouselSlots`: **past weeks only when a plan exists**; **current week + 4 weeks ahead** always shown (empty = not started). Titles are always `Week of {Month} {Dth}` from the Monday (`formatWeekOfTitle`), not the stored custom title.
+- Click existing plan → navigate to `/meal-plans/:id`. Click empty slot → `POST /meal-plans` for that Monday, then navigate. No “New plan” button and no delete on the list.
+- List data uses `MealPlanWeekSummaryRead` from `GET /meal-plans`.
 
 ## 4. Auth transport — environment-split
 
@@ -153,7 +160,8 @@ All TypeScript types in `src/types/` mirror the backend Pydantic schema naming:
 
 | Suffix | Purpose | Example |
 |---|---|---|
-| `*Read` | API response shapes — include `id`, timestamps, nested reads | `RecipeRead` |
+| `*Read` | API response shapes — include `id`, timestamps, nested reads | `RecipeRead`, `MealPlanWeekRead` |
+| `*SummaryRead` | Lightweight list responses (omit nested children) | `MealPlanWeekSummaryRead` |
 | `*Create` | POST request body shapes | `RecipeCreate` |
 | `*Update` | PATCH/PUT request body shapes (partial fields) | `RecipeUpdate` |
 

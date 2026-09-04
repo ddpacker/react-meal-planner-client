@@ -1,5 +1,6 @@
 import type {
   MealPlanWeekCreate,
+  MealPlanWeekSummaryRead,
   PlannedMealCreate,
   PlannedMealRead,
 } from '../types/mealPlan';
@@ -22,6 +23,18 @@ export const COURSE_ROLE_LABELS = {
   side: 'Side',
   dessert: 'Dessert',
 } as const;
+
+/** How many weeks ahead of the current week the user may plan (inclusive of +4). */
+export const MAX_WEEKS_AHEAD = 4;
+
+/** Monday of the week containing `from` (local time). */
+export function getMondayOfWeek(from: Date = new Date()): Date {
+  const date = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const day = date.getDay(); // 0 = Sunday … 6 = Saturday
+  const daysFromMonday = day === 0 ? 6 : day - 1;
+  date.setDate(date.getDate() - daysFromMonday);
+  return date;
+}
 
 /** Upcoming Monday in local time — today when today is Monday. */
 export function getUpcomingMonday(from: Date = new Date()): Date {
@@ -96,8 +109,8 @@ export function toPlannedMealCreates(meals: PlannedMealRead[]): PlannedMealCreat
   }));
 }
 
-export function buildNewWeekPlanBody(from: Date = new Date()): MealPlanWeekCreate {
-  const start = getUpcomingMonday(from);
+export function buildWeekPlanBody(monday: Date): MealPlanWeekCreate {
+  const start = getMondayOfWeek(monday);
   const end = addDaysLocal(start, 6);
   return {
     title: formatWeekOfTitle(start),
@@ -107,4 +120,61 @@ export function buildNewWeekPlanBody(from: Date = new Date()): MealPlanWeekCreat
     // so generate-recipes only runs on meals the user actually named.
     planned_meals: [],
   };
+}
+
+/** @deprecated Prefer buildWeekPlanBody(getMondayOfWeek(from)) for current-week creates. */
+export function buildNewWeekPlanBody(from: Date = new Date()): MealPlanWeekCreate {
+  return buildWeekPlanBody(getUpcomingMonday(from));
+}
+
+export type MealPlanCarouselSlot = {
+  mondayIso: string;
+  title: string;
+  plan: MealPlanWeekSummaryRead | null;
+  isCurrentWeek: boolean;
+};
+
+/**
+ * Past retained plans (ascending by Monday) plus virtual slots for current week
+ * through MAX_WEEKS_AHEAD. Empty past weeks are omitted.
+ */
+export function buildCarouselSlots(
+  plans: MealPlanWeekSummaryRead[],
+  today: Date = new Date(),
+): MealPlanCarouselSlot[] {
+  const currentMonday = getMondayOfWeek(today);
+  const currentIso = toIsoDateLocal(currentMonday);
+  const byStart = new Map(plans.map((plan) => [plan.start_date, plan]));
+
+  const pastSlots: MealPlanCarouselSlot[] = plans
+    .filter((plan) => plan.start_date < currentIso)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date))
+    .map((plan) => {
+      const monday = parseIsoDateLocal(plan.start_date);
+      return {
+        mondayIso: plan.start_date,
+        title: formatWeekOfTitle(monday),
+        plan,
+        isCurrentWeek: false,
+      };
+    });
+
+  const forwardSlots: MealPlanCarouselSlot[] = [];
+  for (let week = 0; week <= MAX_WEEKS_AHEAD; week += 1) {
+    const monday = addDaysLocal(currentMonday, week * 7);
+    const mondayIso = toIsoDateLocal(monday);
+    forwardSlots.push({
+      mondayIso,
+      title: formatWeekOfTitle(monday),
+      plan: byStart.get(mondayIso) ?? null,
+      isCurrentWeek: week === 0,
+    });
+  }
+
+  return [...pastSlots, ...forwardSlots];
+}
+
+function parseIsoDateLocal(iso: string): Date {
+  const [year, month, day] = iso.split('-').map(Number);
+  return new Date(year, month - 1, day);
 }

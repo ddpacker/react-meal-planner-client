@@ -70,6 +70,17 @@ export type MealPlanWeekUpdate = {
   planned_meals?: PlannedMealCreate[] | null;
 };
 
+export type MealPlanWeekSummaryRead = {
+  id: number;
+  start_date: string;
+  end_date: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+  meal_count: number;
+  has_grocery_list: boolean;
+};
+
 export type MealPlanWeekRead = {
   id: number;
   start_date: string;
@@ -78,9 +89,7 @@ export type MealPlanWeekRead = {
   created_at: string;
   updated_at: string;
   planned_meals: PlannedMealRead[];
-  /** Pending backend support — treat as optional. */
   meal_count?: number;
-  /** Pending backend support — treat as optional. */
   has_grocery_list?: boolean;
   /** Pending backend support — needed to link to /grocery/:listId. */
   grocery_list_id?: number | null;

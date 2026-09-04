@@ -6,6 +6,7 @@ import {
   applyCreateMealPlanHandler,
   applyMealPlansListHandlers,
   mockMealPlan,
+  mockMealPlanSummary,
 } from '../../__mocks__/mealPlanHandlers';
 import MealPlansPage from '../../pages/MealPlansPage';
 import { renderWithProviders } from '../utils';
@@ -44,15 +45,19 @@ describe('MealPlansPage', () => {
     vi.useRealTimers();
   });
 
-  it('renders plan cards from the list query', async () => {
+  it('renders week-of titles for carousel slots', async () => {
     applyMealPlansListHandlers({
       plans: [
-        mockMealPlan({ id: 1, title: 'Spring Week', meal_count: 3 }),
-        mockMealPlan({
+        mockMealPlanSummary({
+          id: 1,
+          start_date: '2026-07-13',
+          end_date: '2026-07-19',
+          meal_count: 3,
+        }),
+        mockMealPlanSummary({
           id: 2,
-          title: 'Summer Week',
-          start_date: '2026-07-01',
-          end_date: '2026-07-07',
+          start_date: '2026-06-29',
+          end_date: '2026-07-05',
           meal_count: 5,
         }),
       ],
@@ -60,27 +65,48 @@ describe('MealPlansPage', () => {
 
     renderMealPlansPage();
 
-    expect(await screen.findByText('Spring Week')).toBeInTheDocument();
-    expect(screen.getByText('Summer Week')).toBeInTheDocument();
-    expect(screen.getByText('2026-04-14 to 2026-04-20')).toBeInTheDocument();
+    expect(await screen.findByText('Week of July 13th')).toBeInTheDocument();
+    expect(screen.getByText('Week of June 29th')).toBeInTheDocument();
     expect(screen.getByText('3 meals')).toBeInTheDocument();
     expect(screen.getByText('5 meals')).toBeInTheDocument();
+    expect(screen.getByText('Week of July 20th')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /new plan/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
   });
 
-  it('shows an empty state when there are no plans', async () => {
-    applyMealPlansListHandlers({ plans: [] });
+  it('navigates to an existing plan when its card is clicked', async () => {
+    applyMealPlansListHandlers({
+      plans: [
+        mockMealPlanSummary({
+          id: 7,
+          start_date: '2026-07-13',
+          end_date: '2026-07-19',
+          meal_count: 2,
+        }),
+      ],
+    });
 
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMealPlansPage();
 
-    expect(await screen.findByText(/no meal plans yet/i)).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: /new plan/i }).length).toBeGreaterThan(0);
+    await screen.findByText('Week of July 13th');
+    await user.click(screen.getByRole('button', { name: /week of july 13th/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pathname')).toHaveTextContent('/meal-plans/7');
+    });
   });
 
-  it('creates a week starting this Monday and navigates to the new plan', async () => {
+  it('creates a plan when an empty forward slot is clicked', async () => {
     applyMealPlansListHandlers({ plans: [] });
     let postedBody: unknown;
     applyCreateMealPlanHandler({
-      plan: mockMealPlan({ id: 42, title: 'Week of July 13th' }),
+      plan: mockMealPlan({
+        id: 42,
+        title: 'Week of July 20th',
+        start_date: '2026-07-20',
+        end_date: '2026-07-26',
+      }),
       onRequest: (body) => {
         postedBody = body;
       },
@@ -89,27 +115,27 @@ describe('MealPlansPage', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMealPlansPage();
 
-    await screen.findByText(/no meal plans yet/i);
-    await user.click(screen.getAllByRole('button', { name: /new plan/i })[0]);
+    await screen.findByText('Week of July 20th');
+    await user.click(screen.getByRole('button', { name: /week of july 20th/i }));
 
     await waitFor(() => {
       expect(screen.getByTestId('pathname')).toHaveTextContent('/meal-plans/42');
     });
 
     expect(postedBody).toMatchObject({
-      title: 'Week of July 13th',
-      start_date: '2026-07-13',
-      end_date: '2026-07-19',
+      title: 'Week of July 20th',
+      start_date: '2026-07-20',
+      end_date: '2026-07-26',
       planned_meals: [],
     });
   });
 
-  it('uses the following Monday when today is not Monday', async () => {
+  it('creates the current week (Monday of this week) when that empty slot is clicked', async () => {
     vi.setSystemTime(new Date(2026, 6, 14, 12, 0, 0)); // Tuesday Jul 14
     applyMealPlansListHandlers({ plans: [] });
     let postedBody: unknown;
     applyCreateMealPlanHandler({
-      plan: mockMealPlan({ id: 43, title: 'Week of July 20th' }),
+      plan: mockMealPlan({ id: 43, title: 'Week of July 13th' }),
       onRequest: (body) => {
         postedBody = body;
       },
@@ -118,14 +144,14 @@ describe('MealPlansPage', () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     renderMealPlansPage();
 
-    await screen.findByText(/no meal plans yet/i);
-    await user.click(screen.getAllByRole('button', { name: /new plan/i })[0]);
+    await screen.findByText('Week of July 13th');
+    await user.click(screen.getByRole('button', { name: /week of july 13th/i }));
 
     await waitFor(() => {
       expect(postedBody).toMatchObject({
-        title: 'Week of July 20th',
-        start_date: '2026-07-20',
-        end_date: '2026-07-26',
+        title: 'Week of July 13th',
+        start_date: '2026-07-13',
+        end_date: '2026-07-19',
       });
     });
   });

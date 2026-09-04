@@ -2,14 +2,15 @@ import { apiClient } from './client';
 import type {
   MealPlanWeekCreate,
   MealPlanWeekRead,
+  MealPlanWeekSummaryRead,
   MealPlanWeekUpdate,
   PlannedMealRead,
   PlannedMealUpdate,
 } from '../../types/mealPlan';
 import type { RecipeRead } from '../../types/recipe';
 
-export async function fetchMealPlans(): Promise<MealPlanWeekRead[]> {
-  const { data } = await apiClient.get<MealPlanWeekRead[]>('/meal-plans');
+export async function fetchMealPlans(): Promise<MealPlanWeekSummaryRead[]> {
+  const { data } = await apiClient.get<MealPlanWeekSummaryRead[]>('/meal-plans');
   return data;
 }
 
@@ -29,10 +30,6 @@ export async function updateMealPlan(
 ): Promise<MealPlanWeekRead> {
   const { data } = await apiClient.put<MealPlanWeekRead>(`/meal-plans/${id}`, body);
   return data;
-}
-
-export async function deleteMealPlan(id: number): Promise<void> {
-  await apiClient.delete(`/meal-plans/${id}`);
 }
 
 export async function updatePlannedMeal(
