@@ -10,68 +10,52 @@ type MealPlanCarouselProps = {
 
 type CardTransform = {
   opacity: number;
-  rotateX: number;
-  scale: number;
-  translateY: number;
-  translateZ: number;
+  angleDeg: number;
   zIndex: number;
 };
 
 const CARD_HEIGHT = 120;
-const CARD_GAP = 12;
+/** Small seam between faces on the cylinder (not flush, not a wide gutter). */
+const CARD_GAP = 60;
 const SLOT_STRIDE = CARD_HEIGHT + CARD_GAP;
 /** Vertical padding so the first/last card can sit in the viewport center. */
-const EDGE_PAD = 180;
-/** Pull outer cards toward center (px per step beyond the adjacent ring). */
-const OUTER_INSET_PX = 28;
+const EDGE_PAD = 200;
+/**
+ * Degrees between adjacent slots on the wheel. Higher = tighter cylinder
+ * (more squash at the rim). Prior sweet spot was 20 — revert here if needed.
+ */
+const ANGLE_STEP_DEG = 28;
+const CYLINDER_RADIUS = SLOT_STRIDE / (ANGLE_STEP_DEG * (Math.PI / 180));
+const PERSPECTIVE_PX = 1200;
+
+function cardCenterY(index: number): number {
+  return EDGE_PAD + index * SLOT_STRIDE + CARD_HEIGHT / 2;
+}
 
 function transformsForOffset(offsetPx: number): CardTransform {
-  const steps = offsetPx / SLOT_STRIDE;
-  const absSteps = Math.abs(steps);
-  const sign = Math.sign(steps) || 1;
+  const thetaRad = offsetPx / CYLINDER_RADIUS;
+  const absSteps = Math.abs(offsetPx / SLOT_STRIDE);
 
-  // Smaller cylinder radius: gentle near center (cards 2/4), steeper at rim (1/5).
-  let rotateX: number;
-  if (absSteps <= 1) {
-    rotateX = steps * -11;
-  } else {
-    rotateX = sign * -(11 + (absSteps - 1) * 42);
-  }
-
-  // Draw 1 and 5 inward so they sit closer to 2 and 4.
-  const translateY =
-    absSteps > 1 ? -sign * (absSteps - 1) * OUTER_INSET_PX : 0;
-
-  // Gradual fade: center solid, 2/4 slightly soft, 1/5 much dimmer.
   let opacity: number;
   if (absSteps <= 1) {
-    opacity = 1 - absSteps * 0.22;
+    opacity = 1 - absSteps * 0.18;
   } else if (absSteps <= 2.25) {
-    opacity = 0.78 - (absSteps - 1) * 0.4;
+    opacity = 0.82 - (absSteps - 1) * 0.35;
   } else {
-    opacity = Math.max(0, 0.28 - (absSteps - 2.25) * 0.35);
+    opacity = Math.max(0, 0.35 - (absSteps - 2.25) * 0.3);
   }
 
-  // Center card stacks above neighbors so their shadows fall behind it.
-  const translateZ = Math.max(0, 72 - absSteps * 36);
-  const zIndex = Math.round(100 - absSteps * 20);
-
   return {
+    // Negative so cards below center travel down the cylinder (not tip forward).
+    angleDeg: (-thetaRad * 180) / Math.PI,
     opacity,
-    rotateX: Math.max(-62, Math.min(62, rotateX)),
-    scale: absSteps <= 1 ? 1 - absSteps * 0.035 : Math.max(0.7, 1 - absSteps * 0.09),
-    translateY,
-    translateZ,
-    zIndex,
+    zIndex: Math.round(100 - absSteps * 20),
   };
 }
 
 const DEFAULT_TRANSFORM: CardTransform = {
   opacity: 1,
-  rotateX: 0,
-  scale: 1,
-  translateY: 0,
-  translateZ: 0,
+  angleDeg: 0,
   zIndex: 0,
 };
 
@@ -81,10 +65,10 @@ export function MealPlanCarousel({
   onActivate,
 }: MealPlanCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [transforms, setTransforms] = useState<CardTransform[]>(() =>
     slots.map(() => ({ ...DEFAULT_TRANSFORM })),
   );
+  const [focusOffsetY, setFocusOffsetY] = useState(0);
   const didInitialScroll = useRef(false);
 
   const updateTransforms = () => {
@@ -93,22 +77,20 @@ export function MealPlanCarousel({
       return;
     }
     const viewportCenter = scroller.scrollTop + scroller.clientHeight / 2;
-    const next = itemRefs.current.map((el) => {
-      if (!el) {
-        return { ...DEFAULT_TRANSFORM };
-      }
-      const cardCenter = el.offsetTop + el.offsetHeight / 2;
-      return transformsForOffset(cardCenter - viewportCenter);
-    });
-    setTransforms(next);
+    setFocusOffsetY(viewportCenter);
+    setTransforms(
+      slots.map((_, index) =>
+        transformsForOffset(cardCenterY(index) - viewportCenter),
+      ),
+    );
   };
 
   useLayoutEffect(() => {
-    itemRefs.current = itemRefs.current.slice(0, slots.length);
     if (!didInitialScroll.current && scrollerRef.current) {
       const currentIndex = slots.findIndex((slot) => slot.isCurrentWeek);
       if (currentIndex >= 0) {
-        const targetTop = EDGE_PAD + currentIndex * SLOT_STRIDE - scrollerRef.current.clientHeight / 2 + CARD_HEIGHT / 2;
+        const targetTop =
+          cardCenterY(currentIndex) - scrollerRef.current.clientHeight / 2;
         scrollerRef.current.scrollTop = Math.max(0, targetTop);
       }
       didInitialScroll.current = true;
@@ -138,33 +120,35 @@ export function MealPlanCarousel({
   return (
     <div
       ref={scrollerRef}
-      className="scrollbar-none -mx-16 h-[min(70vh,560px)] overflow-y-auto overscroll-contain px-16 [perspective:900px] [scroll-snap-type:y_mandatory] [mask-image:linear-gradient(to_bottom,transparent_0%,black_16%,black_84%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_16%,black_84%,transparent_100%)]"
+      className="scrollbar-none -mx-16 h-[min(70vh,560px)] overflow-y-auto overscroll-contain px-16 [scroll-snap-type:y_mandatory] [mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_86%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,black_14%,black_86%,transparent_100%)]"
+      style={{ perspective: `${PERSPECTIVE_PX}px`, perspectiveOrigin: '50% 50%' }}
       aria-label="Meal plan weeks"
     >
       <div
-        className="flex w-full flex-col"
+        className="relative w-full"
         style={{
-          paddingTop: EDGE_PAD,
-          paddingBottom: EDGE_PAD,
-          gap: CARD_GAP,
+          height: EDGE_PAD * 2 + slots.length * SLOT_STRIDE - CARD_GAP,
           transformStyle: 'preserve-3d',
+          // Keep the front of the wheel near the screen plane.
+          transform: `translateZ(${-CYLINDER_RADIUS}px)`,
         }}
       >
         {slots.map((slot, index) => {
           const t = transforms[index] ?? DEFAULT_TRANSFORM;
+          const offsetPx = cardCenterY(index) - focusOffsetY;
           return (
             <div
               key={slot.mondayIso}
-              ref={(el) => {
-                itemRefs.current[index] = el;
-              }}
-              className="relative shrink-0 [scroll-snap-align:center]"
+              className="absolute left-0 right-0 [scroll-snap-align:center]"
               style={{
+                top: cardCenterY(index) - CARD_HEIGHT / 2,
                 height: CARD_HEIGHT,
                 opacity: t.opacity,
                 zIndex: t.zIndex,
-                transform: `translateZ(${t.translateZ}px) translateY(${t.translateY}px) rotateX(${t.rotateX}deg) scale(${t.scale})`,
-                transformOrigin: 'center center',
+                // Move to wheel axis (viewport center), rotate, push out to rim.
+                transform: `translateY(${-offsetPx}px) rotateX(${t.angleDeg}deg) translateZ(${CYLINDER_RADIUS}px)`,
+                transformStyle: 'preserve-3d',
+                backfaceVisibility: 'hidden',
                 willChange: 'transform, opacity',
               }}
             >
